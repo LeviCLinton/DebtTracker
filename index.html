@@ -587,6 +587,54 @@ function Tooltip({ label, position = "top", className = "", children }) {
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 
+function TabDropdown({ tabs, activeTab, onSelect, className = "" }) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef(null);
+  const active = tabs.find((t) => t.id === activeTab) || tabs[0];
+
+  useEffect(() => {
+    if (!open) return;
+    const onOutside = (e) => { if (rootRef.current && !rootRef.current.contains(e.target)) setOpen(false); };
+    const onEsc = (e) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", onOutside);
+    document.addEventListener("keydown", onEsc);
+    return () => {
+      document.removeEventListener("mousedown", onOutside);
+      document.removeEventListener("keydown", onEsc);
+    };
+  }, [open]);
+
+  return (
+    <div ref={rootRef} className={`relative ${className}`}>
+      <button onClick={() => setOpen((o) => !o)} aria-haspopup="menu" aria-expanded={open}
+        className="w-full flex items-center gap-2 h-9 px-3 rounded-xl text-[13px] font-medium focus-ring border border-[var(--border-soft)]"
+        style={{ color: "var(--text-primary)", background: "var(--surface-hover)" }}>
+        <Icon name={active.icon} size={14} className="shrink-0" />
+        <span className="truncate">{active.label}</span>
+        <Icon name="chevron-down" size={14} className="ml-auto shrink-0 transition-transform" style={{ transform: open ? "rotate(180deg)" : "none" }} />
+      </button>
+      {open && (
+        <div role="menu" className="absolute left-0 top-full mt-2 w-56 max-w-[calc(100vw-2rem)] glass anim-in overflow-hidden z-40"
+          style={{ background: "var(--surface)" }}>
+          {tabs.map((t) => (
+            <button key={t.id} role="menuitem" onClick={() => { onSelect(t.id); setOpen(false); }}
+              className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[13.5px] font-medium text-left focus-ring"
+              style={{
+                color: t.id === activeTab ? "var(--text-primary)" : "var(--text-muted)",
+                background: t.id === activeTab ? "var(--surface-hover)" : "transparent",
+              }}>
+              <Icon name={t.icon} size={15} className="shrink-0" />
+              <span className="truncate">{t.label}</span>
+              {t.id === activeTab && <Icon name="check-circle" size={14} className="ml-auto shrink-0" style={{ color: "var(--emerald)" }} />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 function toB64(buf) {
   const bytes = new Uint8Array(buf);
   let bin = "";
@@ -3899,7 +3947,7 @@ function Dashboard({ data, saveData, onLock, onChangeCredential, onFactoryReset 
             </div>
             <span className="font-display font-semibold text-[17px] tracking-tight hidden sm:inline">DebtTracker</span>
           </div>
-          <nav ref={navRef} className="relative flex items-center gap-1 overflow-x-auto no-scrollbar">
+          <nav ref={navRef} className="hidden md:flex relative items-center gap-1 overflow-x-auto no-scrollbar">
             <div
               className="absolute top-0 bottom-0 rounded-xl bg-[var(--surface-hover)] transition-all duration-300 ease-out"
               style={{ left: tabIndicator.left, width: tabIndicator.width, opacity: tabIndicator.ready ? 1 : 0, zIndex: 0 }}
@@ -3914,6 +3962,7 @@ function Dashboard({ data, saveData, onLock, onChangeCredential, onFactoryReset 
               </Tooltip>
             ))}
           </nav>
+          <TabDropdown tabs={TABS} activeTab={tab} onSelect={setTab} className="md:hidden flex-1 min-w-0" />
           <div className="flex items-center gap-2 shrink-0">
             <InstallButton variant="icon" />
             <Tooltip label="Import a spreadsheet, export your data, or back it up." position="bottom">
