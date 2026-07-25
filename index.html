@@ -851,6 +851,60 @@ async function markBackupCompleted() {
   const prevMeta = (await idbGet(IDB_SYNC_META_KEY)) || {};
   await idbSet(IDB_SYNC_META_KEY, { ...prevMeta, lastBackupAt: Date.now() });
 }
+
+/* --- Live currency conversion. A second, deliberate exception to "nothing
+   leaves this device" (the first being the optional AI assistant): to
+   convert real balances between currencies, DebtTracker fetches live rates
+   from a free, keyless, no-signup exchange rate service (open.er-api.com).
+   Only the two currency codes are sent — no financial data ever leaves the
+   device. Rates are cached briefly so re-picking the same pair doesn't
+   re-fetch every time. --- */
+const FX_CACHE_KEY = "fxRatesCache";
+const FX_MAX_AGE_MS = 1000 * 60 * 60; // an hour — as fresh as a free, keyless feed reasonably gets
+
+async function fetchLiveRates(base) {
+  const res = await fetch(`https://open.er-api.com/v6/latest/${base}`);
+  if (!res.ok) throw new Error(`Exchange rate service returned ${res.status}`);
+  const json = await res.json();
+  if (json.result !== "success" || !json.rates) throw new Error("Unexpected response from exchange rate service");
+  return { base, rates: json.rates, fetchedAt: Date.now() };
+}
+
+async function getLiveRates(base) {
+  const cached = await idbGet(FX_CACHE_KEY);
+  if (cached && cached.base === base && (Date.now() - cached.fetchedAt) < FX_MAX_AGE_MS) return cached;
+  const fresh = await fetchLiveRates(base);
+  await idbSet(FX_CACHE_KEY, fresh);
+  return fresh;
+}
+
+function convertAmount(amount, from, to, rateData) {
+  if (from === to) return Number(amount) || 0;
+  const rFrom = from === rateData.base ? 1 : rateData.rates[from];
+  const rTo = to === rateData.base ? 1 : rateData.rates[to];
+  if (!rFrom || !rTo) throw new Error(`No exchange rate available for ${from} or ${to}`);
+  return ((Number(amount) || 0) / rFrom) * rTo;
+}
+
+// Converts every stored monetary value (item balances, minimum payments,
+// original amounts, transaction history, and the extra monthly budget) from
+// one currency to another using a live rate. Interest rates, dates, and
+// everything non-monetary are left untouched.
+function convertDataCurrency(data, from, to, rateData) {
+  const conv = (n) => Math.round(convertAmount(n, from, to, rateData) * 100) / 100;
+  return {
+    ...data,
+    extraBudget: conv(data.extraBudget),
+    items: (data.items || []).map((it) => ({
+      ...it,
+      balance: conv(it.balance),
+      originalAmount: conv(it.originalAmount),
+      minPayment: conv(it.minPayment),
+      history: (it.history || []).map((h) => ({ ...h, amount: conv(h.amount) })),
+    })),
+  };
+}
+
 function idbDeleteDatabase() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.deleteDatabase(IDB_NAME);
@@ -1174,7 +1228,7 @@ function answerAssistantLocally(query, ctx) {
     return "You can change your PIN anytime from Settings → Security → Change. If you're locked out entirely, use \"Forgot your PIN?\" on the login screen — you'll need the backup code you saved at setup.";
   }
   if (has("currency")) {
-    return "Settings → Currency lets you switch how amounts are displayed (USD, KES, EUR, and more). It only changes formatting, not actual values — DebtTracker doesn't do currency conversion.";
+    return "Settings → Currency lets you switch between USD, KES, EUR, and more. You get a choice there: just relabel the display, or actually convert every balance using a live exchange rate fetched at that moment.";
   }
   if (has("add a debt", "add debt", "new debt", "log a debt")) {
     return "Go to the \"I Owe\" tab (or Overview) and tap \"Add debt.\" You'll enter a name, balance, interest rate, and minimum payment.";
@@ -2398,7 +2452,7 @@ function StrategyToggle({ strategy, setStrategy }) {
       <div className="grid grid-cols-2 relative">
         <div className="absolute top-0 bottom-0 w-1/2 rounded-2xl transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
           style={{
-            background: strategy === "snowball" ? "linear-gradient(135deg,#FBF3E0,#F6E8C8)" : "linear-gradient(135deg,#F5F3EC,#EFEDE5)",
+            background: strategy === "snowball" ? "var(--emerald-dim)" : "var(--azure-dim)",
             border: `1px solid ${strategy === "snowball" ? "#E4C57C" : "#DEDBD2"}`,
             transform: strategy === "snowball" ? "translateX(0%)" : "translateX(100%)",
           }}></div>
@@ -3092,10 +3146,45 @@ function SettingsView({ data, saveData, onChangeCredential, onFactoryReset }) {
   const [showChangeModal, setShowChangeModal] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const currency = data.settings?.currency || "USD";
+  const [pendingCurrency, setPendingCurrency] = useState(null);
+  const [converting, setConverting] = useState(false);
+  const [convertError, setConvertError] = useState("");
+  const [convertedNote, setConvertedNote] = useState("");
 
   const changeCurrency = (code) => {
     setCurrentCurrency(code); // update immediately so this same render pass reflects it
     saveData((prev) => ({ ...prev, settings: { ...prev.settings, currency: code } }));
+  };
+
+  const pickCurrency = (code) => {
+    setConvertError("");
+    setConvertedNote("");
+    if (code === currency) return;
+    setPendingCurrency(code);
+  };
+
+  const displayOnly = () => {
+    changeCurrency(pendingCurrency);
+    setPendingCurrency(null);
+  };
+
+  const convertBalances = async () => {
+    setConverting(true);
+    setConvertError("");
+    try {
+      const rates = await getLiveRates(currency);
+      const rate = convertAmount(1, currency, pendingCurrency, rates);
+      saveData((prev) => ({
+        ...convertDataCurrency(prev, currency, pendingCurrency, rates),
+        settings: { ...prev.settings, currency: pendingCurrency },
+      }));
+      setCurrentCurrency(pendingCurrency);
+      setConvertedNote(`Converted at 1 ${currency} ≈ ${rate.toFixed(4)} ${pendingCurrency} (just fetched).`);
+      setPendingCurrency(null);
+    } catch (e) {
+      setConvertError(e.message || "Couldn't reach the exchange rate service. Check your connection and try again.");
+    }
+    setConverting(false);
   };
 
   const saveProfile = () => {
@@ -3150,16 +3239,45 @@ function SettingsView({ data, saveData, onChangeCredential, onFactoryReset }) {
         </div>
         <label className="text-[12px] text-[var(--text-muted)] font-medium mb-2 block">Display all amounts in</label>
         <div className="relative">
-          <select value={currency} onChange={(e) => changeCurrency(e.target.value)}
-            className="styled-select w-full bg-[var(--surface)] border border-[var(--border-soft)] rounded-xl pl-4 pr-9 py-3 text-sm focus-ring focus:border-[var(--emerald)] cursor-pointer appearance-none">
+          <select value={currency} onChange={(e) => pickCurrency(e.target.value)} disabled={!!pendingCurrency || converting}
+            className="styled-select w-full bg-[var(--surface)] border border-[var(--border-soft)] rounded-xl pl-4 pr-9 py-3 text-sm focus-ring focus:border-[var(--emerald)] cursor-pointer appearance-none disabled:opacity-60">
             {CURRENCIES.map((c) => (
               <option key={c.code} value={c.code}>{c.symbol} — {c.label} ({c.code})</option>
             ))}
           </select>
           <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-dim)] pointer-events-none"><Icon name="chevron-down" size={14} /></span>
         </div>
+
+        {pendingCurrency && (
+          <div className="mt-4 p-4 rounded-xl anim-in" style={{ background: "var(--surface)", border: "1px solid var(--border-soft)" }}>
+            <p className="text-[13px] font-medium mb-1">Switch to {pendingCurrency}?</p>
+            <p className="text-[12px] text-[var(--text-muted)] leading-relaxed mb-3">
+              "Convert balances" fetches a live rate from a free third-party exchange rate service (open.er-api.com) — only the two currency codes are sent, no financial data leaves this device — and updates every stored balance, minimum payment, and history entry to match. "Just change display" keeps your numbers exactly as they are and only relabels them.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={convertBalances} disabled={converting}
+                className="h-9 px-3.5 rounded-xl text-[13px] font-display font-semibold focus-ring disabled:opacity-60"
+                style={{ background: "var(--emerald)", color: "#211804" }}>
+                {converting ? "Fetching live rate…" : "Convert balances (live rate)"}
+              </button>
+              <button onClick={displayOnly} disabled={converting}
+                className="h-9 px-3.5 rounded-xl text-[13px] font-display font-semibold focus-ring disabled:opacity-60"
+                style={{ background: "var(--surface-hover)", color: "var(--text-muted)" }}>
+                Just change display
+              </button>
+              <button onClick={() => setPendingCurrency(null)} disabled={converting}
+                className="h-9 px-3.5 rounded-xl text-[13px] font-display font-semibold focus-ring disabled:opacity-60"
+                style={{ background: "transparent", color: "var(--text-dim)" }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+        {convertError && <p className="text-[11px] mt-3" style={{ color: "var(--danger)" }}>{convertError}</p>}
+        {convertedNote && <p className="text-[11px] mt-3 text-[var(--emerald)]">{convertedNote}</p>}
+
         <p className="text-[11px] text-[var(--text-dim)] mt-3">
-          This only changes how numbers are <em>displayed</em> — balances aren't converted, so switching currencies doesn't change what you actually owe or are owed.
+          Choosing "just change display" only changes how numbers are shown — balances aren't converted. "Convert balances" actually recalculates what you owe and are owed using a live exchange rate, and needs an internet connection.
         </p>
       </div>
 
