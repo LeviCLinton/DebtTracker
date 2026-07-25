@@ -296,7 +296,7 @@
   .avatar img{ width:100%; height:100%; object-fit:cover; }
 
   .dropzone{
-    border:1.5px dashed var(--border); border-radius:20px; transition: border-color 0.2s ease, background 0.2s ease;
+    border:1.5px dashed var(--border); transition: border-color 0.2s ease, background 0.2s ease;
   }
   .dropzone.drag-over{ border-color:var(--emerald); background:rgba(184,121,10,0.06); }
 
@@ -3639,7 +3639,7 @@ function DataPanel({ items, onClose, onImport }) {
           <>
             <h3 className="text-[12px] uppercase tracking-widest text-[var(--text-dim)] font-medium mb-2">Import from a spreadsheet</h3>
             <Tooltip label="Get a ready-made .xlsx with the right columns and two example rows." position="bottom" className="w-full">
-              <button onClick={downloadTemplate} className="w-full flex items-center justify-between px-4 py-3 rounded-xl mb-3 focus-ring" style={{ background: "var(--azure-dim)", border: "1px solid var(--border-soft-azure)" }}>
+              <button onClick={downloadTemplate} className="w-full flex items-center justify-between px-4 py-3 mb-3 focus-ring" style={{ background: "var(--azure-dim)", border: "1px solid var(--border-soft-azure)" }}>
                 <span className="flex items-center gap-2 text-sm font-medium text-[var(--azure)]"><Icon name="download" size={15} /> Download blank Excel template</span>
                 <Icon name="chevron-right" size={15} className="text-[var(--azure)]" />
               </button>
@@ -3648,7 +3648,7 @@ function DataPanel({ items, onClose, onImport }) {
               Fill it in offline — one row per debt or person who owes you — then drop the same file back in below and it'll be read in automatically.
             </p>
             <div
-              className={`dropzone rounded-2xl p-6 text-center cursor-pointer ${dragOver ? "drag-over" : ""}`}
+              className={`dropzone p-6 text-center cursor-pointer ${dragOver ? "drag-over" : ""}`}
               onClick={() => fileRef.current?.click()}
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
