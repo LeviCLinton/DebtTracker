@@ -1,4 +1,4 @@
-// Ledger service worker — caches the app shell (this file + its CDN
+// DebtTracker service worker — caches the app shell (this file + its CDN
 // dependencies) so the app keeps working offline after the first visit.
 // This is what actually makes "Install App" meaningful rather than cosmetic:
 // without a registered service worker, Chrome/Edge won't consider the page
@@ -42,7 +42,7 @@ self.addEventListener("activate", (event) => {
    Encryption Key, so it can never decrypt real entries — it only reads a
    small unencrypted record ("syncMeta") that the page itself mirrors: a
    due-soon count and a couple of timestamps. Never names, amounts, or dates.
-   That's a deliberate, minimal exception to Ledger's zero-knowledge design,
+   That's a deliberate, minimal exception to DebtTracker's zero-knowledge design,
    made only because the person explicitly opted in via Settings. --- */
 const IDB_NAME = "ledger_debtdash_db";
 const IDB_VERSION = 1;
@@ -92,10 +92,10 @@ async function runPeriodicCheck() {
   if (!meta || !meta.enabled) return; // respect the opt-in toggle
 
   if (meta.dueSoonCount > 0) {
-    await self.registration.showNotification("Ledger", {
+    await self.registration.showNotification("DebtTracker", {
       body: meta.dueSoonCount === 1
-        ? "1 entry is due soon — open Ledger to review it."
-        : `${meta.dueSoonCount} entries are due soon — open Ledger to review them.`,
+        ? "1 entry is due soon — open DebtTracker to review it."
+        : `${meta.dueSoonCount} entries are due soon — open DebtTracker to review them.`,
       icon: "./icons/icon-192.png",
       badge: "./icons/icon-192.png",
       tag: "ledger-due-soon",
@@ -106,8 +106,8 @@ async function runPeriodicCheck() {
   const sinceBackup = now - (meta.lastBackupAt || 0);
   const sincePrompt = now - (meta.lastBackupPromptAt || 0);
   if (sinceBackup > BACKUP_REMINDER_INTERVAL_MS && sincePrompt > BACKUP_REMINDER_INTERVAL_MS) {
-    await self.registration.showNotification("Ledger", {
-      body: "It's been a while since your last backup. Open Ledger to back up to your own cloud storage.",
+    await self.registration.showNotification("DebtTracker", {
+      body: "It's been a while since your last backup. Open DebtTracker to back up to your own cloud storage.",
       icon: "./icons/icon-192.png",
       badge: "./icons/icon-192.png",
       tag: "ledger-backup-reminder",
@@ -118,7 +118,7 @@ async function runPeriodicCheck() {
 
 /* --- One-off Background Sync: retries a queued AI-assistant request once
    connectivity returns. The queued record briefly holds the user's own API
-   key and message text UNENCRYPTED (this worker has no access to Ledger's
+   key and message text UNENCRYPTED (this worker has no access to DebtTracker's
    encryption key) — every entry is scrubbed of its key and message content
    the instant a send attempt finishes, whether it succeeds or fails. --- */
 const PENDING_SYNC_KEY = "pendingAssistantSync";
