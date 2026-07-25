@@ -72,35 +72,37 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    /* ===== Minimalist & Clean — warm white base, single amber/gold accent ===== */
-    --bg-base:#F6E4B8;
-    --bg-vignette:linear-gradient(160deg, #FFFCF3 0%, #FBEAC0 35%, #F3D68C 70%, #E9C169 100%);
+    /* ===== Enterprise Fintech — slate/navy base, sky-blue CTA, mint/coral status colors ===== */
+    --bg-base:#F8FAFC;
+    --bg-vignette:linear-gradient(160deg, #FFFFFF 0%, #F8FAFC 45%, #F1F5F9 100%);
     --surface:#FFFFFF;
     --surface-raised:#FFFFFF;
-    --surface-hover:#F3F1EA;
-    --border:#E7E4DC;
-    --border-soft:#EFEDE6;
-    --text-primary:#241A08;
-    --text-muted:#6B5028;
-    --text-dim:#8C7247;
-    --emerald:#B8790A;
-    --emerald-dim:#F6EAD2;
-    --azure:#14120D;
-    --azure-dim:#F0EEE7;
-    --amber:#B8790A;
-    --amber-dim:#F6EAD2;
-    --danger:#B3392C;
-    --danger-dim:#F7E7E4;
-    --violet:#14120D;
-    --accent:#B8790A;
-    --accent-ink:#211804;
-    --accent-border:#E4C57C;
-    --glass-bg:rgba(255,255,255,0.72);
+    --surface-hover:#F1F5F9;
+    --border:#E2E8F0;
+    --border-soft:#EDF2F7;
+    --text-primary:#0F172A;
+    --text-muted:#475569;
+    --text-dim:#94A3B8;
+    --emerald:#10B981;
+    --emerald-dim:#D1FAE5;
+    --azure:#0EA5E9;
+    --azure-dim:#E0F2FE;
+    --amber:#F59E0B;
+    --amber-dim:#FEF3C7;
+    --danger:#EF4444;
+    --danger-dim:#FEE2E2;
+    --violet:#0F172A;
+    --accent:#0EA5E9;
+    --accent-ink:#FFFFFF;
+    --accent-border:#BAE6FD;
+    --border-soft-emerald:#6EE7B7;
+    --border-soft-azure:#7DD3FC;
+    --glass-bg:rgba(255,255,255,0.75);
     --glass-border:var(--border-soft);
-    --header-bg:rgba(250,249,246,0.82);
+    --header-bg:rgba(248,250,252,0.85);
   }
   html[data-theme="dark"]{
     /* ===== Dark mode — same warm gold identity, inverted onto deep charcoal-brown ===== */
@@ -126,6 +128,8 @@
     --accent:#E0AC4E;
     --accent-ink:#211804;
     --accent-border:#5C4A24;
+    --border-soft-emerald:#E4C57C;
+    --border-soft-azure:#DEDBD2;
     --glass-bg:rgba(36,29,18,0.7);
     --glass-border:rgba(224,172,78,0.14);
     --header-bg:rgba(20,16,10,0.82);
@@ -155,8 +159,8 @@
     min-height:100vh;
     -webkit-font-smoothing:antialiased;
   }
-  .font-display{font-family:'Space Grotesk',sans-serif;}
-  .font-mono{font-family:'JetBrains Mono',monospace;}
+  .font-display{font-family:'Newsreader',serif;}
+  .font-mono{font-family:'IBM Plex Mono',monospace;}
   ::-webkit-scrollbar{width:8px;height:8px;}
   ::-webkit-scrollbar-track{background:transparent;}
   ::-webkit-scrollbar-thumb{background:#DDD9CF;border-radius:8px;}
@@ -231,7 +235,7 @@
   .pin-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid #D6D2C6;transition:all 0.18s ease;}
   .pin-dot.filled{background:var(--emerald);border-color:var(--emerald);box-shadow:0 0 10px rgba(184,121,10,0.45);}
 
-  .keypad-btn{ transition:all 0.12s ease; font-family:'Space Grotesk',sans-serif; }
+  .keypad-btn{ transition:all 0.12s ease; font-family:'Newsreader',serif; }
   .keypad-btn:active{transform:scale(0.92); background:var(--surface-hover);}
 
   .segbtn{ transition: color 0.35s ease; }
@@ -287,7 +291,7 @@
   .avatar{
     border-radius:9999px; overflow:hidden; display:flex; align-items:center; justify-content:center;
     background:var(--surface-raised); border:1px solid var(--border-soft); flex-shrink:0;
-    font-family:'Space Grotesk',sans-serif; font-weight:600; color:var(--text-muted);
+    font-family:'Newsreader',serif; font-weight:600; color:var(--text-muted);
   }
   .avatar img{ width:100%; height:100%; object-fit:cover; }
 
@@ -322,7 +326,7 @@
   .social-btn:hover{ background:var(--surface-hover); transform:translateY(-1px); border-color:#D9D5C9; }
   .social-btn:active{ transform:scale(0.98); }
 
-  .recovery-code-capsule{ font-family:'JetBrains Mono',monospace; letter-spacing:0.06em; }
+  .recovery-code-capsule{ font-family:'IBM Plex Mono',monospace; letter-spacing:0.06em; }
 
   @keyframes gentlePop{
     0%{ opacity:0; transform:scale(0.9) translateY(6px); }
@@ -378,7 +382,7 @@
   .avatar{ border-radius:9999px; }
 
   /* ===== Typography: extreme weight contrast instead of color changes ===== */
-  .font-display{ font-weight:800 !important; letter-spacing:-0.01em; }
+  .font-display{ font-weight:700 !important; letter-spacing:-0.005em; }
   body{ font-weight:400; }
   [class*="text-[var(--text-muted)]"], [class*="text-[var(--text-dim)]"]{ font-weight:300; }
 
@@ -411,7 +415,7 @@
   .landing-hero-orb{ position:absolute; border-radius:50%; filter:blur(80px); pointer-events:none; }
   @keyframes heroFloatA{ 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(30px,-20px); } }
   @keyframes heroFloatB{ 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(-24px,26px); } }
-  .landing-mono-figure{ font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; }
+  .landing-mono-figure{ font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; }
 </style>
 </head>
 <body>
@@ -1448,7 +1452,7 @@ function CredentialScreen({ mode, title, subtitle, icon = "lock", onSubmit, erro
     <div className="min-h-screen flex items-center justify-center px-5 py-10 relative z-10">
       <div className="w-full max-w-sm anim-rise">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-[var(--emerald-dim)] border border-[#E4C57C] flex items-center justify-center mb-5 float-slow anim-pop">
+          <div className="w-16 h-16 rounded-2xl bg-[var(--emerald-dim)] border border-[var(--border-soft-emerald)] flex items-center justify-center mb-5 float-slow anim-pop">
             <Icon name={icon} size={28} className="text-[var(--emerald)]" />
           </div>
           <h1 className="font-display text-2xl font-semibold tracking-tight text-center">{title}</h1>
@@ -1485,7 +1489,7 @@ function CredentialScreen({ mode, title, subtitle, icon = "lock", onSubmit, erro
 
           <RippleButton onClick={submit} disabled={!canSubmit}
             className="w-full mt-6 h-12 rounded-2xl font-display font-semibold text-[15px] transition-all focus-ring disabled:opacity-30 disabled:cursor-not-allowed"
-            style={{ background: canSubmit ? "var(--emerald)" : "var(--surface)", color: canSubmit ? "#211804" : "var(--text-dim)" }}>
+            style={{ background: canSubmit ? "var(--emerald)" : "var(--surface)", color: canSubmit ? "var(--accent-ink)" : "var(--text-dim)" }}>
             {submitLabel}
           </RippleButton>
 
@@ -1529,7 +1533,7 @@ function RecoveryRevealScreen({ code, note, onContinue, continueLabel = "Continu
     <div className="min-h-screen flex items-center justify-center px-5 py-10 relative z-10">
       <div className="w-full max-w-sm anim-rise">
         <div className="flex flex-col items-center mb-6">
-          <div className="w-16 h-16 rounded-2xl bg-[var(--amber-dim)] border border-[#E4C57C] flex items-center justify-center mb-5 float-slow anim-pop">
+          <div className="w-16 h-16 rounded-2xl bg-[var(--amber-dim)] border border-[var(--border-soft-emerald)] flex items-center justify-center mb-5 float-slow anim-pop">
             <Icon name="key" size={26} className="text-[var(--amber)]" />
           </div>
           <h1 className="font-display text-2xl font-semibold text-center">Save your recovery code</h1>
@@ -1554,7 +1558,7 @@ function RecoveryRevealScreen({ code, note, onContinue, continueLabel = "Continu
           {!saved && <p className="text-[11px] text-[var(--amber)] -mt-3 mb-5">Copy or download your code first to unlock this checkbox.</p>}
           <button onClick={onContinue} disabled={!confirmed}
             className="w-full h-12 rounded-2xl font-display font-semibold text-[15px] disabled:opacity-30 focus-ring transition-all"
-            style={{ background: confirmed ? "var(--emerald)" : "var(--surface)", color: confirmed ? "#211804" : "var(--text-dim)" }}>
+            style={{ background: confirmed ? "var(--emerald)" : "var(--surface)", color: confirmed ? "var(--accent-ink)" : "var(--text-dim)" }}>
             {continueLabel}
           </button>
         </div>
@@ -1614,7 +1618,7 @@ function TwoFAOfferScreen({ onEnable, onSkip }) {
     <div className="min-h-screen flex items-center justify-center px-5 py-10 relative z-10">
       <div className="w-full max-w-sm anim-rise">
         <div className="flex flex-col items-center mb-6">
-          <div className="w-16 h-16 rounded-2xl bg-[var(--azure-dim)] border border-[#DEDBD2] flex items-center justify-center mb-5 float-slow anim-pop">
+          <div className="w-16 h-16 rounded-2xl bg-[var(--azure-dim)] border border-[var(--border-soft-azure)] flex items-center justify-center mb-5 float-slow anim-pop">
             <Icon name="shield-check" size={26} className="text-[var(--azure)]" />
           </div>
           <h1 className="font-display text-2xl font-semibold text-center">Add two-factor authentication?</h1>
@@ -1623,7 +1627,7 @@ function TwoFAOfferScreen({ onEnable, onSkip }) {
           </p>
         </div>
         <div className="glass rounded-3xl p-5 sm:p-6 space-y-3">
-          <button onClick={onEnable} className="w-full h-12 rounded-2xl font-display font-semibold text-[15px] focus-ring transition-transform active:scale-[0.98]" style={{ background: "var(--emerald)", color: "#211804" }}>Set up 2FA</button>
+          <button onClick={onEnable} className="w-full h-12 rounded-2xl font-display font-semibold text-[15px] focus-ring transition-transform active:scale-[0.98]" style={{ background: "var(--emerald)", color: "var(--accent-ink)" }}>Set up 2FA</button>
           <button onClick={onSkip} className="w-full h-12 rounded-2xl font-display font-semibold text-[15px] text-[var(--text-muted)] border border-[var(--border-soft)] focus-ring hover:bg-[var(--surface-hover)] transition-colors">Skip for now</button>
         </div>
       </div>
@@ -1663,7 +1667,7 @@ function TwoFASetupScreen({ secret, otpauthUrl, onVerify, onSkip, error }) {
           {error && <p className="text-[var(--danger)] text-xs mb-2 font-medium">{error}</p>}
           <button onClick={() => onVerify(code)} disabled={code.length !== 6}
             className="w-full h-12 rounded-2xl font-display font-semibold text-[15px] disabled:opacity-30 focus-ring mt-3 transition-all"
-            style={{ background: code.length === 6 ? "var(--emerald)" : "var(--surface)", color: code.length === 6 ? "#211804" : "var(--text-dim)" }}>
+            style={{ background: code.length === 6 ? "var(--emerald)" : "var(--surface)", color: code.length === 6 ? "var(--accent-ink)" : "var(--text-dim)" }}>
             Confirm &amp; enable
           </button>
           <button onClick={onSkip} className="w-full text-center text-[12px] text-[var(--text-muted)] hover:text-[var(--text-primary)] mt-4 focus-ring">Skip for now</button>
@@ -1683,7 +1687,7 @@ function TwoFAVerifyScreen({ onVerify, error }) {
     <div className="min-h-screen flex items-center justify-center px-5 py-10 relative z-10">
       <div className="w-full max-w-sm anim-rise">
         <div className="flex flex-col items-center mb-6">
-          <div className="w-16 h-16 rounded-2xl bg-[var(--azure-dim)] border border-[#DEDBD2] flex items-center justify-center mb-5 float-slow anim-pop">
+          <div className="w-16 h-16 rounded-2xl bg-[var(--azure-dim)] border border-[var(--border-soft-azure)] flex items-center justify-center mb-5 float-slow anim-pop">
             <Icon name="shield-check" size={26} className="text-[var(--azure)]" />
           </div>
           <h1 className="font-display text-2xl font-semibold text-center">Two-factor code</h1>
@@ -1696,7 +1700,7 @@ function TwoFAVerifyScreen({ onVerify, error }) {
           {error && <p className="text-[var(--danger)] text-xs text-center mb-3 font-medium">{error}</p>}
           <button onClick={() => onVerify(code)} disabled={code.length !== 6}
             className="w-full h-12 rounded-2xl font-display font-semibold text-[15px] disabled:opacity-30 focus-ring mt-2 transition-all"
-            style={{ background: code.length === 6 ? "var(--emerald)" : "var(--surface)", color: code.length === 6 ? "#211804" : "var(--text-dim)" }}>
+            style={{ background: code.length === 6 ? "var(--emerald)" : "var(--surface)", color: code.length === 6 ? "var(--accent-ink)" : "var(--text-dim)" }}>
             Verify
           </button>
         </div>
@@ -1712,7 +1716,7 @@ function ForgotExplainScreen({ onHaveCode, onBackToLogin, onFactoryReset }) {
     <div className="min-h-screen flex items-center justify-center px-5 py-10 relative z-10">
       <div className="w-full max-w-sm anim-rise">
         <div className="flex flex-col items-center mb-6">
-          <div className="w-16 h-16 rounded-2xl bg-[var(--azure-dim)] border border-[#DEDBD2] flex items-center justify-center mb-5 float-slow anim-pop">
+          <div className="w-16 h-16 rounded-2xl bg-[var(--azure-dim)] border border-[var(--border-soft-azure)] flex items-center justify-center mb-5 float-slow anim-pop">
             <Icon name="key" size={26} className="text-[var(--azure)]" />
           </div>
           <h1 className="font-display text-2xl font-semibold text-center">Reset your PIN</h1>
@@ -1721,7 +1725,7 @@ function ForgotExplainScreen({ onHaveCode, onBackToLogin, onFactoryReset }) {
           </p>
         </div>
         <div className="glass rounded-3xl p-5 sm:p-6 space-y-3">
-          <button onClick={onHaveCode} className="w-full h-12 rounded-2xl font-display font-semibold text-[15px] focus-ring transition-transform active:scale-[0.98]" style={{ background: "var(--emerald)", color: "#211804" }}>
+          <button onClick={onHaveCode} className="w-full h-12 rounded-2xl font-display font-semibold text-[15px] focus-ring transition-transform active:scale-[0.98]" style={{ background: "var(--emerald)", color: "var(--accent-ink)" }}>
             I have my recovery code
           </button>
           <button onClick={onBackToLogin} className="w-full h-12 rounded-2xl font-display font-semibold text-[15px] text-[var(--text-muted)] border border-[var(--border-soft)] focus-ring hover:bg-[var(--surface-hover)] transition-colors">
@@ -1770,10 +1774,10 @@ function MetricCard({ icon, label, value, sub, accent, delay = 0, tip, animateVa
     ? (signed ? `${animated >= 0 ? "+" : ""}${fmtMoney(animated)}` : fmtMoney(animated))
     : value;
   const accentMap = {
-    emerald: { bg: "var(--emerald-dim)", border: "#E4C57C", text: "var(--emerald)" },
-    azure: { bg: "var(--azure-dim)", border: "#DEDBD2", text: "var(--azure)" },
-    amber: { bg: "var(--amber-dim)", border: "#E4C57C", text: "var(--amber)" },
-    violet: { bg: "#241b3d", border: "#DEDBD2", text: "var(--violet)" },
+    emerald: { bg: "var(--emerald-dim)", border: "var(--border-soft-emerald)", text: "var(--emerald)" },
+    azure: { bg: "var(--azure-dim)", border: "var(--border-soft-azure)", text: "var(--azure)" },
+    amber: { bg: "var(--amber-dim)", border: "var(--border-soft-emerald)", text: "var(--amber)" },
+    violet: { bg: "var(--surface-hover)", border: "var(--border-soft-azure)", text: "var(--violet)" },
   };
   const a = accentMap[accent];
   return (
@@ -2032,13 +2036,13 @@ function RippleButton({ className = "", style, onClick, children, disabled, ...r
 function EmptyState({ icon = "landmark", title, sub, cta, onCta }) {
   return (
     <div className="glass rounded-3xl p-10 sm:p-14 text-center anim-in">
-      <div className="w-14 h-14 rounded-2xl bg-[var(--emerald-dim)] border border-[#E4C57C] flex items-center justify-center mx-auto mb-5">
+      <div className="w-14 h-14 rounded-2xl bg-[var(--emerald-dim)] border border-[var(--border-soft-emerald)] flex items-center justify-center mx-auto mb-5">
         <Icon name={icon} size={24} className="text-[var(--emerald)]" />
       </div>
       <h3 className="font-display text-xl font-semibold mb-2">{title}</h3>
       <p className="text-[var(--text-muted)] text-sm mb-6 max-w-sm mx-auto">{sub}</p>
       {cta && (
-        <button onClick={onCta} className="inline-flex items-center gap-2 h-11 px-5 rounded-2xl font-display font-semibold text-sm focus-ring" style={{ background: "var(--emerald)", color: "#211804" }}>
+        <button onClick={onCta} className="inline-flex items-center gap-2 h-11 px-5 rounded-2xl font-display font-semibold text-sm focus-ring" style={{ background: "var(--emerald)", color: "var(--accent-ink)" }}>
           <Icon name="plus" size={16} /> {cta}
         </button>
       )}
@@ -2195,11 +2199,11 @@ function TransactionModal({ item, onClose, onApply }) {
         </div>
         <div className="glass rounded-2xl p-1 grid grid-cols-2 mb-5">
           <button onClick={() => setKind("payment")} className={`py-2.5 rounded-xl text-sm font-medium font-display transition-all ${kind === "payment" ? "" : "text-[var(--text-muted)]"}`}
-            style={{ background: kind === "payment" ? "var(--emerald-dim)" : "transparent", color: kind === "payment" ? "var(--emerald)" : undefined, border: kind === "payment" ? "1px solid #E4C57C" : "1px solid transparent" }}>
+            style={{ background: kind === "payment" ? "var(--emerald-dim)" : "transparent", color: kind === "payment" ? "var(--emerald)" : undefined, border: kind === "payment" ? "1px solid var(--border-soft-emerald)" : "1px solid transparent" }}>
             <Icon name="minus-circle" size={14} className="inline mr-1.5 -mt-0.5" />{item.type === "debt" ? "Payment" : "Received"}
           </button>
           <button onClick={() => setKind("charge")} className={`py-2.5 rounded-xl text-sm font-medium font-display transition-all ${kind === "charge" ? "" : "text-[var(--text-muted)]"}`}
-            style={{ background: kind === "charge" ? "var(--amber-dim)" : "transparent", color: kind === "charge" ? "var(--amber)" : undefined, border: kind === "charge" ? "1px solid #E4C57C" : "1px solid transparent" }}>
+            style={{ background: kind === "charge" ? "var(--amber-dim)" : "transparent", color: kind === "charge" ? "var(--amber)" : undefined, border: kind === "charge" ? "1px solid var(--border-soft-emerald)" : "1px solid transparent" }}>
             <Icon name="plus-circle" size={14} className="inline mr-1.5 -mt-0.5" />{item.type === "debt" ? "New charge" : "Lend more"}
           </button>
         </div>
@@ -2245,7 +2249,7 @@ function TransactionModal({ item, onClose, onApply }) {
         </div>
         <button onClick={() => valid && onApply({ kind, amount: Number(amount), date, note, receipt })} disabled={!valid}
           className="w-full mt-6 h-12 rounded-2xl font-display font-semibold text-[15px] disabled:opacity-30 focus-ring"
-          style={{ background: kind === "payment" ? "var(--emerald)" : "var(--amber)", color: "#211804" }}>
+          style={{ background: kind === "payment" ? "var(--emerald)" : "var(--amber)", color: "var(--accent-ink)" }}>
           Confirm {kind === "payment" ? (item.type === "debt" ? "payment" : "receipt") : (item.type === "debt" ? "charge" : "loan")}
         </button>
       </div>
@@ -2312,11 +2316,11 @@ function ItemModal({ initial, defaultType, onClose, onSave, onDelete, onSettle, 
 
         <div className="glass rounded-2xl p-1 grid grid-cols-2 mb-5">
           <button onClick={() => setType("debt")} className="py-2.5 rounded-xl text-sm font-medium font-display transition-all"
-            style={{ background: type === "debt" ? "var(--emerald-dim)" : "transparent", color: type === "debt" ? "var(--emerald)" : "var(--text-muted)", border: type === "debt" ? "1px solid #E4C57C" : "1px solid transparent" }}>
+            style={{ background: type === "debt" ? "var(--emerald-dim)" : "transparent", color: type === "debt" ? "var(--emerald)" : "var(--text-muted)", border: type === "debt" ? "1px solid var(--border-soft-emerald)" : "1px solid transparent" }}>
             <Icon name="trending-down" size={14} className="inline mr-1.5 -mt-0.5" /> I owe this
           </button>
           <button onClick={() => setType("receivable")} className="py-2.5 rounded-xl text-sm font-medium font-display transition-all"
-            style={{ background: type === "receivable" ? "var(--azure-dim)" : "transparent", color: type === "receivable" ? "var(--azure)" : "var(--text-muted)", border: type === "receivable" ? "1px solid #DEDBD2" : "1px solid transparent" }}>
+            style={{ background: type === "receivable" ? "var(--azure-dim)" : "transparent", color: type === "receivable" ? "var(--azure)" : "var(--text-muted)", border: type === "receivable" ? "1px solid var(--border-soft-azure)" : "1px solid transparent" }}>
             <Icon name="trending-up" size={14} className="inline mr-1.5 -mt-0.5" /> Owed to me
           </button>
         </div>
@@ -2324,7 +2328,7 @@ function ItemModal({ initial, defaultType, onClose, onSave, onDelete, onSettle, 
         <div className="flex items-center gap-4 mb-5">
           <div className="relative">
             <Avatar image={contactImage} name={contact || name} size={56} />
-            <button onClick={() => fileRef.current?.click()} className="icon-btn absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[var(--emerald)] text-[#211804] flex items-center justify-center border-2 border-[var(--bg-base)]" aria-label="Upload photo">
+            <button onClick={() => fileRef.current?.click()} className="icon-btn absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[var(--emerald)] text-[var(--accent-ink)] flex items-center justify-center border-2 border-[var(--bg-base)]" aria-label="Upload photo">
               <Icon name="camera" size={13} />
             </button>
             <input ref={fileRef} type="file" accept="image/*" onChange={handleImage} className="hidden" />
@@ -2397,7 +2401,7 @@ function ItemModal({ initial, defaultType, onClose, onSave, onDelete, onSettle, 
               </button>
               {initial.status === "active" && (
                 <button onClick={() => onSettle(initial.id)} className="h-11 px-3.5 rounded-xl text-sm font-display font-semibold flex items-center justify-center gap-2 focus-ring"
-                  style={{ background: "var(--emerald-dim)", border: "1px solid #E4C57C", color: "var(--emerald)" }} title="Mark as fully settled">
+                  style={{ background: "var(--emerald-dim)", border: "1px solid var(--border-soft-emerald)", color: "var(--emerald)" }} title="Mark as fully settled">
                   <Icon name="badge-check" size={15} />
                 </button>
               )}
@@ -2434,7 +2438,7 @@ function ItemModal({ initial, defaultType, onClose, onSave, onDelete, onSettle, 
             </button>
           )}
           <button onClick={submit} disabled={!valid} className="flex-1 h-12 rounded-2xl font-display font-semibold text-[15px] disabled:opacity-30 focus-ring"
-            style={{ background: "var(--emerald)", color: "#211804" }}>
+            style={{ background: "var(--emerald)", color: "var(--accent-ink)" }}>
             {isEdit ? "Save changes" : "Add entry"}
           </button>
         </div>
@@ -2453,7 +2457,7 @@ function StrategyToggle({ strategy, setStrategy }) {
         <div className="absolute top-0 bottom-0 w-1/2 rounded-2xl transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
           style={{
             background: strategy === "snowball" ? "var(--emerald-dim)" : "var(--azure-dim)",
-            border: `1px solid ${strategy === "snowball" ? "#E4C57C" : "#DEDBD2"}`,
+            border: `1px solid ${strategy === "snowball" ? "var(--border-soft-emerald)" : "var(--border-soft-azure)"}`,
             transform: strategy === "snowball" ? "translateX(0%)" : "translateX(100%)",
           }}></div>
         <Tooltip label="Prioritizes paying off your smallest balances first for quick psychological wins." position="bottom" className="w-full">
@@ -2597,8 +2601,8 @@ function ContactsView({ items, onOpenItem }) {
                 </Tooltip>
               </div>
               <div className="flex gap-2 mt-3 text-[12px]">
-                <span className="px-4 py-1.5 rounded-lg bg-[var(--azure-dim)] text-[var(--azure)] border border-[#DEDBD2]">Owes you {fmtMoney(c.receivableTotal)}</span>
-                <span className="px-4 py-1.5 rounded-lg bg-[var(--amber-dim)] text-[var(--amber)] border border-[#E4C57C]">You owe {fmtMoney(c.debtTotal)}</span>
+                <span className="px-4 py-1.5 rounded-lg bg-[var(--azure-dim)] text-[var(--azure)] border border-[var(--border-soft-azure)]">Owes you {fmtMoney(c.receivableTotal)}</span>
+                <span className="px-4 py-1.5 rounded-lg bg-[var(--amber-dim)] text-[var(--amber)] border border-[var(--border-soft-emerald)]">You owe {fmtMoney(c.debtTotal)}</span>
               </div>
               <div className={`collapse-grid ${isOpen ? "open" : ""}`}>
                 <div className="collapse-inner">
@@ -2822,7 +2826,7 @@ function ChangeCredentialModal({ onClose, onSubmit }) {
               placeholder="Current PIN" />
             {error && <p className="text-[var(--danger)] text-xs font-medium">{error}</p>}
             <button onClick={handleCurrentContinue} disabled={!currentValid}
-              className="w-full h-12 rounded-2xl font-display font-semibold text-[15px] disabled:opacity-30 focus-ring" style={{ background: "var(--emerald)", color: "#211804" }}>
+              className="w-full h-12 rounded-2xl font-display font-semibold text-[15px] disabled:opacity-30 focus-ring" style={{ background: "var(--emerald)", color: "var(--accent-ink)" }}>
               Continue
             </button>
           </div>
@@ -2836,7 +2840,7 @@ function ChangeCredentialModal({ onClose, onSubmit }) {
               className="w-full bg-[var(--surface)] border border-[var(--border-soft)] rounded-xl px-4 py-3 text-sm font-mono tracking-widest text-center focus-ring focus:border-[var(--emerald)]"
               placeholder="New 4–6 digit PIN" />
             <button onClick={handleNewContinue} disabled={!newValid}
-              className="w-full h-12 rounded-2xl font-display font-semibold text-[15px] disabled:opacity-30 focus-ring" style={{ background: "var(--emerald)", color: "#211804" }}>
+              className="w-full h-12 rounded-2xl font-display font-semibold text-[15px] disabled:opacity-30 focus-ring" style={{ background: "var(--emerald)", color: "var(--accent-ink)" }}>
               Continue
             </button>
           </div>
@@ -2852,7 +2856,7 @@ function ChangeCredentialModal({ onClose, onSubmit }) {
               placeholder="Confirm PIN" />
             {error && <p className="text-[var(--danger)] text-xs font-medium">{error}</p>}
             <button onClick={handleFinalSubmit} disabled={busy || confirmVal.length < 4}
-              className="w-full h-12 rounded-2xl font-display font-semibold text-[15px] disabled:opacity-30 focus-ring" style={{ background: "var(--emerald)", color: "#211804" }}>
+              className="w-full h-12 rounded-2xl font-display font-semibold text-[15px] disabled:opacity-30 focus-ring" style={{ background: "var(--emerald)", color: "var(--accent-ink)" }}>
               {busy ? "Saving…" : "Save new PIN"}
             </button>
           </div>
@@ -3223,7 +3227,7 @@ function SettingsView({ data, saveData, onChangeCredential, onFactoryReset }) {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={saveProfile} className="h-10 px-4 rounded-xl text-[13px] font-display font-semibold focus-ring" style={{ background: "var(--emerald)", color: "#211804" }}>
+          <button onClick={saveProfile} className="h-10 px-4 rounded-xl text-[13px] font-display font-semibold focus-ring" style={{ background: "var(--emerald)", color: "var(--accent-ink)" }}>
             Save profile
           </button>
           {savedPulse && <span className="text-[12px] text-[var(--emerald)] flex items-center gap-2 anim-in"><Icon name="check-circle" size={14} /> Saved</span>}
@@ -3257,7 +3261,7 @@ function SettingsView({ data, saveData, onChangeCredential, onFactoryReset }) {
             <div className="flex flex-wrap gap-2">
               <button onClick={convertBalances} disabled={converting}
                 className="h-9 px-3.5 rounded-xl text-[13px] font-display font-semibold focus-ring disabled:opacity-60"
-                style={{ background: "var(--emerald)", color: "#211804" }}>
+                style={{ background: "var(--emerald)", color: "var(--accent-ink)" }}>
                 {converting ? "Fetching live rate…" : "Convert balances (live rate)"}
               </button>
               <button onClick={displayOnly} disabled={converting}
@@ -3449,7 +3453,7 @@ function BackgroundRemindersSection() {
           className="h-9 px-3.5 rounded-xl text-[13px] font-display font-semibold focus-ring disabled:opacity-60"
           style={enabled
             ? { background: "var(--danger-dim)", border: "1px solid #E8BFB8", color: "var(--danger)" }
-            : { background: "var(--emerald)", color: "#211804" }}>
+            : { background: "var(--emerald)", color: "var(--accent-ink)" }}>
           {enabled ? "Disable" : "Enable"}
         </button>
       </div>
@@ -3587,7 +3591,7 @@ function DataPanel({ items, onClose, onImport }) {
           <>
             <h3 className="text-[12px] uppercase tracking-widest text-[var(--text-dim)] font-medium mb-2">Import from a spreadsheet</h3>
             <Tooltip label="Get a ready-made .xlsx with the right columns and two example rows." position="bottom" className="w-full">
-              <button onClick={downloadTemplate} className="w-full flex items-center justify-between px-4 py-3 rounded-xl mb-3 focus-ring" style={{ background: "var(--azure-dim)", border: "1px solid #DEDBD2" }}>
+              <button onClick={downloadTemplate} className="w-full flex items-center justify-between px-4 py-3 rounded-xl mb-3 focus-ring" style={{ background: "var(--azure-dim)", border: "1px solid var(--border-soft-azure)" }}>
                 <span className="flex items-center gap-2 text-sm font-medium text-[var(--azure)]"><Icon name="download" size={15} /> Download blank Excel template</span>
                 <Icon name="chevron-right" size={15} className="text-[var(--azure)]" />
               </button>
@@ -3610,7 +3614,7 @@ function DataPanel({ items, onClose, onImport }) {
 
             <h3 className="text-[12px] uppercase tracking-widest text-[var(--text-dim)] font-medium mb-2 mt-7">Export your data</h3>
             <div className="grid grid-cols-1 gap-2">
-              <button onClick={exportEverything} className="flex items-center justify-between px-4 py-3 rounded-xl focus-ring" style={{ background: "var(--emerald-dim)", border: "1px solid #E4C57C" }}>
+              <button onClick={exportEverything} className="flex items-center justify-between px-4 py-3 rounded-xl focus-ring" style={{ background: "var(--emerald-dim)", border: "1px solid var(--border-soft-emerald)" }}>
                 <span className="flex items-center gap-2 text-sm font-medium text-[var(--emerald)]"><Icon name="download" size={16} /> Export everything (JSON + 2 CSVs)</span>
                 <Icon name="chevron-right" size={15} className="text-[var(--emerald)]" />
               </button>
@@ -3646,7 +3650,7 @@ function DataPanel({ items, onClose, onImport }) {
             <div className="flex gap-3">
               <button onClick={() => setImportPreview(null)} className="flex-1 h-11 rounded-xl text-sm font-medium bg-[var(--surface)] border border-[var(--border-soft)] focus-ring">Cancel</button>
               <button onClick={() => { onImport(importPreview.rows); setImportPreview(null); onClose(); }}
-                className="flex-1 h-11 rounded-xl text-sm font-display font-semibold focus-ring" style={{ background: "var(--emerald)", color: "#211804" }}>
+                className="flex-1 h-11 rounded-xl text-sm font-display font-semibold focus-ring" style={{ background: "var(--emerald)", color: "var(--accent-ink)" }}>
                 Import {importPreview.rows.length} entries
               </button>
             </div>
@@ -3736,7 +3740,7 @@ function InstallButton({ variant = "icon" }) {
           </button>
         </Tooltip>
       ) : (
-        <RippleButton onClick={handleClick} className="inline-flex items-center gap-2 h-12 px-6 rounded-2xl font-display font-semibold text-[15px] focus-ring" style={{ background: "var(--emerald)", color: "#211804" }}>
+        <RippleButton onClick={handleClick} className="inline-flex items-center gap-2 h-12 px-6 rounded-2xl font-display font-semibold text-[15px] focus-ring" style={{ background: "var(--emerald)", color: "var(--accent-ink)" }}>
           <Icon name="download" size={17} /> Install DebtTracker
         </RippleButton>
       )}
@@ -3828,8 +3832,8 @@ function Dashboard({ data, saveData, onLock, onChangeCredential, onFactoryReset 
   const totalReceivable = receivables.filter((d) => d.status === "active").reduce((s, d) => s + d.balance, 0);
 
   const strategyColor = strategy === "snowball"
-    ? { text: "var(--emerald)", dim: "var(--emerald-dim)", border: "#E4C57C" }
-    : { text: "var(--azure)", dim: "var(--azure-dim)", border: "#DEDBD2" };
+    ? { text: "var(--emerald)", dim: "var(--emerald-dim)", border: "var(--border-soft-emerald)" }
+    : { text: "var(--azure)", dim: "var(--azure-dim)", border: "var(--border-soft-azure)" };
 
   const oweFiltered = useMemo(() => filterSortItems(debts, { query, sortBy, sortDir, statusFilter }), [debts, query, sortBy, sortDir, statusFilter]);
   const owedFiltered = useMemo(() => filterSortItems(receivables, { query, sortBy, sortDir, statusFilter }), [receivables, query, sortBy, sortDir, statusFilter]);
@@ -3890,7 +3894,7 @@ function Dashboard({ data, saveData, onLock, onChangeCredential, onFactoryReset 
       <header className="sticky top-0 z-30 backdrop-blur-md border-b border-[var(--border-soft)]" style={{ background: "var(--header-bg)" }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 shrink-0">
-            <div className="w-8 h-8 rounded-xl bg-[var(--emerald-dim)] border border-[#E4C57C] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-[var(--emerald-dim)] border border-[var(--border-soft-emerald)] flex items-center justify-center">
               <Icon name="landmark" size={16} className="text-[var(--emerald)]" />
             </div>
             <span className="font-display font-semibold text-[17px] tracking-tight hidden sm:inline">DebtTracker</span>
@@ -3936,7 +3940,7 @@ function Dashboard({ data, saveData, onLock, onChangeCredential, onFactoryReset 
             </div>
 
             {sim.insufficient && (
-              <div className="glass rounded-2xl p-4 mb-6 flex items-center gap-3 border-[#E4C57C] anim-in">
+              <div className="glass rounded-2xl p-4 mb-6 flex items-center gap-3 border-[var(--border-soft-emerald)] anim-in">
                 <Icon name="triangle-alert" size={18} className="text-[var(--amber)] shrink-0" />
                 <p className="text-[13px] text-[var(--text-muted)]">At this payment level your payoff stretches past 60 years. Increase your extra monthly budget to see a realistic freedom date.</p>
               </div>
@@ -3947,7 +3951,7 @@ function Dashboard({ data, saveData, onLock, onChangeCredential, onFactoryReset 
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="font-display font-semibold text-lg">Your debts (payoff order)</h2>
                   <Tooltip label="Add a new card, loan, or line of credit you owe." position="bottom">
-                    <RippleButton onClick={() => openNew("debt")} className="icon-btn inline-flex items-center gap-2 h-9 px-3.5 rounded-xl text-[13px] font-display font-semibold focus-ring" style={{ background: "var(--emerald)", color: "#211804" }}>
+                    <RippleButton onClick={() => openNew("debt")} className="icon-btn inline-flex items-center gap-2 h-9 px-3.5 rounded-xl text-[13px] font-display font-semibold focus-ring" style={{ background: "var(--emerald)", color: "var(--accent-ink)" }}>
                       <Icon name="plus" size={15} /> Add debt
                     </RippleButton>
                   </Tooltip>
@@ -3974,7 +3978,7 @@ function Dashboard({ data, saveData, onLock, onChangeCredential, onFactoryReset 
                   </div>
                   <div className="font-mono text-2xl font-semibold mb-3">{fmtMoney(totalReceivable)}</div>
                   <Tooltip label="Track money you've lent to someone else." position="bottom" className="w-full">
-                    <button onClick={() => openNew("receivable")} className="w-full h-10 rounded-xl text-[13px] font-display font-semibold flex items-center justify-center gap-2 focus-ring" style={{ background: "var(--azure-dim)", border: "1px solid #DEDBD2", color: "var(--azure)" }}>
+                    <button onClick={() => openNew("receivable")} className="w-full h-10 rounded-xl text-[13px] font-display font-semibold flex items-center justify-center gap-2 focus-ring" style={{ background: "var(--azure-dim)", border: "1px solid var(--border-soft-azure)", color: "var(--azure)" }}>
                       <Icon name="plus" size={14} /> Add who owes you
                     </button>
                   </Tooltip>
@@ -3991,7 +3995,7 @@ function Dashboard({ data, saveData, onLock, onChangeCredential, onFactoryReset 
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-display font-semibold text-lg">{tab === "owe" ? "Debts you owe" : "People who owe you"}</h2>
               <Tooltip label={tab === "owe" ? "Add a new card, loan, or line of credit you owe." : "Add a new person or loan that owes you money."} position="bottom">
-                <button onClick={() => openNew(tab === "owe" ? "debt" : "receivable")} className="icon-btn inline-flex items-center gap-2 h-9 px-3.5 rounded-xl text-[13px] font-display font-semibold focus-ring" style={{ background: "var(--emerald)", color: "#211804" }}>
+                <button onClick={() => openNew(tab === "owe" ? "debt" : "receivable")} className="icon-btn inline-flex items-center gap-2 h-9 px-3.5 rounded-xl text-[13px] font-display font-semibold focus-ring" style={{ background: "var(--emerald)", color: "var(--accent-ink)" }}>
                   <Icon name="plus" size={15} /> Add {tab === "owe" ? "debt" : "receivable"}
                 </button>
               </Tooltip>
@@ -4002,7 +4006,7 @@ function Dashboard({ data, saveData, onLock, onChangeCredential, onFactoryReset 
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
                 {(tab === "owe" ? oweFiltered : owedFiltered).map((d, i) => (
-                  <ItemCard key={d.id} item={d} rank={tab === "owe" ? rankMap[d.id] : null} accentColor={tab === "owe" ? strategyColor : { text: "var(--azure)", dim: "var(--azure-dim)", border: "#DEDBD2" }} onOpen={setModalItem} delay={i * 40} />
+                  <ItemCard key={d.id} item={d} rank={tab === "owe" ? rankMap[d.id] : null} accentColor={tab === "owe" ? strategyColor : { text: "var(--azure)", dim: "var(--azure-dim)", border: "var(--border-soft-azure)" }} onOpen={setModalItem} delay={i * 40} />
                 ))}
               </div>
             )}
