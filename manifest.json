@@ -1,6 +1,6 @@
 {
-  "name": "Ledger — Debt & Receivables Tracker",
-  "short_name": "Ledger",
+  "name": "DebtTracker — Debt & Receivables Tracker",
+  "short_name": "DebtTracker",
   "description": "Track what you owe and who owes you — encrypted, private, and 100% offline on your device.",
   "start_url": "./debt-dashboard.html",
   "scope": "./",
