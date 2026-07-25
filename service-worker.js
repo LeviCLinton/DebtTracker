@@ -8,9 +8,9 @@ const CACHE_VERSION = "ledger-v1";
 const APP_SHELL = [
   "./debt-dashboard.html",
   "./manifest.json",
-  "./icons/icon-192.png",
-  "./icons/icon-512.png",
-  "./icons/icon-512-maskable.png",
+  "./icon-192.png",
+  "./icon-512.png",
+  "./icon-512-maskable.png",
   "https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js",
   "https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js",
   "https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js",
@@ -96,8 +96,8 @@ async function runPeriodicCheck() {
       body: meta.dueSoonCount === 1
         ? "1 entry is due soon — open DebtTracker to review it."
         : `${meta.dueSoonCount} entries are due soon — open DebtTracker to review them.`,
-      icon: "./icons/icon-192.png",
-      badge: "./icons/icon-192.png",
+      icon: "./icon-192.png",
+      badge: "./icon-192.png",
       tag: "ledger-due-soon",
     });
   }
@@ -108,8 +108,8 @@ async function runPeriodicCheck() {
   if (sinceBackup > BACKUP_REMINDER_INTERVAL_MS && sincePrompt > BACKUP_REMINDER_INTERVAL_MS) {
     await self.registration.showNotification("DebtTracker", {
       body: "It's been a while since your last backup. Open DebtTracker to back up to your own cloud storage.",
-      icon: "./icons/icon-192.png",
-      badge: "./icons/icon-192.png",
+      icon: "./icon-192.png",
+      badge: "./icon-192.png",
       tag: "ledger-backup-reminder",
     });
     try { await swIdbSet(SYNC_META_KEY, { ...meta, lastBackupPromptAt: now }); } catch (e) { /* ignore */ }
