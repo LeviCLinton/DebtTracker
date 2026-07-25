@@ -2,6 +2,8 @@
   "name": "DebtTracker — Debt & Receivables Tracker",
   "short_name": "DebtTracker",
   "description": "Track what you owe and who owes you — encrypted, private, and 100% offline on your device.",
+  "lang": "en",
+  "dir": "ltr",
   "start_url": "./debt-dashboard.html",
   "scope": "./",
   "id": "./debt-dashboard.html",
@@ -9,6 +11,9 @@
   "orientation": "portrait-primary",
   "background_color": "#F6E4B8",
   "theme_color": "#B8790A",
+  "launch_handler": {
+    "client_mode": "auto"
+  },
   "categories": [
     "finance",
     "productivity"
@@ -31,6 +36,38 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "./screenshots/desktop-home.png",
+      "sizes": "1568x631",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "DebtTracker overview — track what you owe and who owes you"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add a debt",
+      "short_name": "Add debt",
+      "description": "Log something you owe",
+      "url": "./debt-dashboard.html?shortcut=add-debt",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Add a receivable",
+      "short_name": "Add owed",
+      "description": "Log something owed to you",
+      "url": "./debt-dashboard.html?shortcut=add-receivable",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Ask the assistant",
+      "short_name": "Assistant",
+      "description": "Ask about your balances or payoff plan",
+      "url": "./debt-dashboard.html?shortcut=assistant",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ],
   "related_applications": [],
