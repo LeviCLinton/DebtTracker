@@ -705,6 +705,13 @@ const IDB_NAME = "ledger_debtdash_db";
 const IDB_VERSION = 1;
 const IDB_STORE = "kv";
 const IDB_RECORD_KEY = "authStore";
+// A second, UNENCRYPTED record in the same store. The service worker has no
+// access to the in-memory Data Encryption Key, so it can never decrypt real
+// items — this tiny mirror (a due-soon count and some timestamps, never
+// names/amounts/dates) is the only thing it's allowed to read, and it's what
+// makes background due-date and backup reminders possible without weakening
+// the zero-knowledge design.
+const IDB_SYNC_META_KEY = "syncMeta";
 
 /* --- IndexedDB storage layer. Bigger quota than localStorage (important now
    that receipts and contact photos live inside the encrypted blob) and never
@@ -755,6 +762,95 @@ async function loadAuthStore() {
   } catch (e) { return null; }
 }
 async function saveAuthStore(value) { return idbSet(IDB_RECORD_KEY, value); }
+
+/* --- Background reminders (Periodic Background Sync). Opt-in only, and only
+   available on Chromium browsers when Ledger is installed and used enough
+   for the browser to grant the periodic-background-sync permission — there's
+   no prompt for it like there is for notifications. When unsupported, these
+   functions simply no-op and the app works exactly as before. --- */
+const PERIODIC_SYNC_TAG = "ledger-periodic-check";
+// One-off Background Sync: retries a failed AI-assistant request once the
+// browser regains connectivity — the only network call Ledger ever makes.
+// The queued record briefly holds the user's own API key and message text
+// UNENCRYPTED in IndexedDB (the service worker has no access to the
+// encryption key), so entries are scrubbed the instant a send attempt
+// finishes, one way or the other.
+const IDB_PENDING_SYNC_KEY = "pendingAssistantSync";
+const BACKGROUND_SYNC_TAG = "ledger-assistant-retry";
+
+async function queueAssistantRetry(payload) {
+  const queue = (await idbGet(IDB_PENDING_SYNC_KEY)) || [];
+  const id = uid("sync");
+  queue.push({ id, queuedAt: Date.now(), attempts: 0, status: "pending", ...payload });
+  await idbSet(IDB_PENDING_SYNC_KEY, queue);
+  if ("serviceWorker" in navigator) {
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      if ("sync" in reg) await reg.sync.register(BACKGROUND_SYNC_TAG);
+    } catch (e) { /* best effort — queued item still gets picked up on next app load */ }
+  }
+  return id;
+}
+
+async function takeFinishedAssistantReplies() {
+  const queue = (await idbGet(IDB_PENDING_SYNC_KEY)) || [];
+  const finished = queue.filter((q) => q.status === "done" || q.status === "failed");
+  if (finished.length) {
+    const remaining = queue.filter((q) => q.status === "pending");
+    await idbSet(IDB_PENDING_SYNC_KEY, remaining);
+  }
+  return finished;
+}
+
+async function getBackgroundRemindersEnabled() {
+  const meta = await idbGet(IDB_SYNC_META_KEY);
+  return !!(meta && meta.enabled);
+}
+
+async function enableBackgroundReminders() {
+  if (!("Notification" in window)) return { ok: false, reason: "Notifications aren't supported in this browser." };
+  const perm = await Notification.requestPermission();
+  if (perm !== "granted") return { ok: false, reason: "Notification permission was not granted." };
+
+  if (!("serviceWorker" in navigator)) return { ok: false, reason: "Service workers aren't supported in this browser." };
+  const reg = await navigator.serviceWorker.ready;
+  if (!("periodicSync" in reg)) {
+    // Still useful without it — just means reminders only fire while the
+    // service worker happens to be active, not on a real background timer.
+    const prevMeta = (await idbGet(IDB_SYNC_META_KEY)) || {};
+    await idbSet(IDB_SYNC_META_KEY, { ...prevMeta, enabled: true });
+    return { ok: true, degraded: true, reason: "Periodic Background Sync isn't supported here — install the app and use it a bit more for full background reminders." };
+  }
+
+  try {
+    const status = await navigator.permissions.query({ name: "periodic-background-sync" });
+    if (status.state !== "granted") {
+      return { ok: false, reason: "This browser hasn't granted background sync yet — try again after installing and using Ledger a bit more." };
+    }
+    await reg.periodicSync.register(PERIODIC_SYNC_TAG, { minInterval: 12 * 60 * 60 * 1000 });
+    const prevMeta = (await idbGet(IDB_SYNC_META_KEY)) || {};
+    await idbSet(IDB_SYNC_META_KEY, { ...prevMeta, enabled: true, lastBackupPromptAt: prevMeta.lastBackupPromptAt || Date.now() });
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, reason: "Couldn't register background sync in this browser." };
+  }
+}
+
+async function disableBackgroundReminders() {
+  try {
+    if ("serviceWorker" in navigator) {
+      const reg = await navigator.serviceWorker.ready;
+      if ("periodicSync" in reg) await reg.periodicSync.unregister(PERIODIC_SYNC_TAG);
+    }
+  } catch (e) { /* ignore */ }
+  const prevMeta = (await idbGet(IDB_SYNC_META_KEY)) || {};
+  await idbSet(IDB_SYNC_META_KEY, { ...prevMeta, enabled: false });
+}
+
+async function markBackupCompleted() {
+  const prevMeta = (await idbGet(IDB_SYNC_META_KEY)) || {};
+  await idbSet(IDB_SYNC_META_KEY, { ...prevMeta, lastBackupAt: Date.now() });
+}
 function idbDeleteDatabase() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.deleteDatabase(IDB_NAME);
@@ -2848,6 +2944,24 @@ function AssistantPanel({ data, saveData, sim, onClose }) {
     saveData((prev) => ({ ...prev, assistant: { ...prev.assistant, shareData: !prev.assistant?.shareData } }));
   };
 
+  useEffect(() => {
+    takeFinishedAssistantReplies().then((finished) => {
+      if (!finished.length) return;
+      setMessages((m) => [
+        ...m,
+        ...finished.flatMap((f) => {
+          const lastUser = (f.history || []).slice(-1)[0];
+          const pair = [];
+          if (lastUser) pair.push({ role: "user", text: lastUser.text, retried: true });
+          pair.push(f.status === "done"
+            ? { role: "assistant", text: f.reply }
+            : { role: "assistant", text: `Couldn't deliver that earlier message: ${f.error || "request failed"}.` });
+          return pair;
+        }),
+      ]);
+    });
+  }, []);
+
   const send = async (text) => {
     const trimmed = (text || input).trim();
     if (!trimmed || busy) return;
@@ -2871,7 +2985,17 @@ function AssistantPanel({ data, saveData, sim, onClose }) {
       const reply = await callAnthropicAPI(assistant.apiKey, assistant.model, nextMessages, systemPrompt);
       setMessages((m) => [...m, { role: "assistant", text: reply }]);
     } catch (e) {
-      setError(e.message || "Something went wrong reaching the API.");
+      const isNetworkFailure = !navigator.onLine || /failed to fetch|networkerror|load failed/i.test(e.message || "");
+      if (isNetworkFailure) {
+        try {
+          await queueAssistantRetry({ apiKey: assistant.apiKey, model: assistant.model, history: nextMessages, systemPrompt });
+          setError("You're offline — I'll send this the moment your connection is back, even if you close the app.");
+        } catch (queueErr) {
+          setError(e.message || "Something went wrong reaching the API.");
+        }
+      } else {
+        setError(e.message || "Something went wrong reaching the API.");
+      }
     }
     setBusy(false);
   };
@@ -3088,6 +3212,8 @@ function SettingsView({ data, saveData, onChangeCredential, onFactoryReset }) {
         </p>
       </div>
 
+      <BackgroundRemindersSection />
+
       <BYOSSection data={data} saveData={saveData} />
 
       {/* Danger zone */}
@@ -3118,6 +3244,7 @@ function BYOSSection({ data, saveData }) {
     const payload = { app: "Ledger", exportedAt: new Date().toISOString(), items: data.items, extraBudget: data.extraBudget, strategy: data.strategy };
     downloadFile(`ledger-backup-${todayISO()}.json`, JSON.stringify(payload, null, 2), "application/json");
     window.open(url, "_blank", "noopener,noreferrer");
+    markBackupCompleted().catch(() => {});
     setTimeout(() => setBusyProvider(""), 1200);
   };
 
@@ -3146,6 +3273,64 @@ function BYOSSection({ data, saveData }) {
           </button>
         ))}
       </div>
+    </div>
+  );
+}
+
+/* ============================= BACKGROUND REMINDERS (opt-in) ============================= */
+function BackgroundRemindersSection() {
+  const [enabled, setEnabled] = useState(false);
+  const [status, setStatus] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    getBackgroundRemindersEnabled().then(setEnabled).catch(() => {});
+  }, []);
+
+  const toggle = async () => {
+    setBusy(true);
+    setStatus("");
+    if (enabled) {
+      await disableBackgroundReminders();
+      setEnabled(false);
+    } else {
+      const res = await enableBackgroundReminders();
+      if (res.ok) {
+        setEnabled(true);
+        if (res.degraded) setStatus(res.reason);
+      } else {
+        setStatus(res.reason || "Couldn't enable background reminders.");
+      }
+    }
+    setBusy(false);
+  };
+
+  return (
+    <div className="glass rounded-3xl p-5 sm:p-7">
+      <div className="flex items-center gap-2 mb-2">
+        <Icon name="alarm-clock" size={17} className="text-[var(--amber)]" />
+        <h3 className="font-display font-semibold text-lg">Background reminders</h3>
+      </div>
+      <p className="text-[13px] text-[var(--text-muted)] leading-relaxed mb-5">
+        When enabled, Ledger can notify you about entries due soon and nudge you to back up, even when the app isn't open. It never decrypts your data to do this — it only ever sees a count of what's due soon, never names, amounts, or dates. Requires installing Ledger and a Chromium-based browser (Chrome, Edge).
+      </p>
+      <div className="flex items-center justify-between px-4 py-3.5 rounded-xl bg-[var(--surface)] border border-[var(--border-soft)]">
+        <div className="flex items-center gap-2">
+          <Icon name="alarm-clock" size={16} className="text-[var(--text-muted)]" />
+          <div>
+            <div className="text-sm font-medium">Due-date & backup reminders</div>
+            <div className="text-[11px] text-[var(--text-dim)]">{enabled ? "Enabled" : "Off"}</div>
+          </div>
+        </div>
+        <button onClick={toggle} disabled={busy}
+          className="h-9 px-3.5 rounded-xl text-[13px] font-display font-semibold focus-ring disabled:opacity-60"
+          style={enabled
+            ? { background: "var(--danger-dim)", border: "1px solid #E8BFB8", color: "var(--danger)" }
+            : { background: "var(--emerald)", color: "#211804" }}>
+          {enabled ? "Disable" : "Enable"}
+        </button>
+      </div>
+      {status && <p className="text-[11px] text-[var(--text-dim)] mt-3">{status}</p>}
     </div>
   );
 }
@@ -3726,6 +3911,7 @@ const LANDING_FEATURES = [
   { icon: "receipt", title: "Attach real receipts", desc: "Snap or upload a photo or PDF against any payment, so the paper trail lives right next to the number.", accent: "azure" },
   { icon: "bar-chart-3", title: "Statistics that matter", desc: "Net position, total interest, largest balances, and a full payment history — even for debts you've already paid off.", accent: "amber" },
   { icon: "cloud", title: "Bring your own storage", desc: "Back up your encrypted data to your own Google Drive, Dropbox, or OneDrive — free, with no account required.", accent: "violet" },
+  { icon: "message-circle", title: "A built-in assistant", desc: "Ask about your balances, payoff date, or how to use the app — answered locally on your device. Connect your own AI key for open-ended conversation, entirely opt-in.", accent: "emerald" },
 ];
 
 const LANDING_ACCENT_MAP = {
@@ -4031,6 +4217,14 @@ function App() {
     const dataBlob = await encryptJSON(keyRef.current, nextData);
     storeRef.current = { ...storeRef.current, data: dataBlob };
     await saveAuthStore(storeRef.current);
+    try {
+      const dueSoonCount = (nextData.items || []).filter((i) =>
+        i.status === "active" && i.dueDate &&
+        daysUntil(i.dueDate) <= (i.reminderDays ?? 3) && daysUntil(i.dueDate) >= -30
+      ).length;
+      const prevMeta = (await idbGet(IDB_SYNC_META_KEY)) || {};
+      await idbSet(IDB_SYNC_META_KEY, { ...prevMeta, dueSoonCount });
+    } catch (e) { /* non-critical — background reminders just skip a beat */ }
   }, []);
 
   const saveData = useCallback((updater) => {
