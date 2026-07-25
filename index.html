@@ -4,12 +4,12 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <!-- The title displayed in Google search results -->
-<title>Ledger - Personal Debt & Receivable Tracker</title>
+<title>DebtTracker - Personal Debt & Receivable Tracker</title>
   <!-- The short snippet displayed under your title in search results -->
-<meta name="description" content="Track your personal debts, loans, and receivables completely offline. Keep your financial records private and secure with Ledger.">
+<meta name="description" content="Track your personal debts, loans, and receivables completely offline. Keep your financial records private and secure with DebtTracker.">
 
 <!-- Open Graph tags (controls how your app looks when shared on social media or WhatsApp) -->
-<meta property="og:title" content="Ledger - Personal Debt Tracker">
+<meta property="og:title" content="DebtTracker - Personal Debt Tracker">
 <meta property="og:description" content="An offline-first tool to manage what you owe and what you are owed.">
 <meta property="og:image" content="https://yourdomain.com/assets/app-preview.png">
 
@@ -23,7 +23,7 @@
 <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAACLElEQVR4nO3cwQ1BQRRAUcTC2kaiGiuFKEEhSlCIlbIstSCu75s4p4CX+fk3bzez3O+2C3jXau4DMDYBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiJZz32AX3e7HKYYezzfpxj7fTYQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASEZ94u56ekwx9nTdTDH2FYN+kQ1EIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZF8+G78oBe8/8pn/5ENRCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERLLc77Zzn4GB2UAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiI5Anb4xADtrxJ0gAAAABJRU5ErkJggg==">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Ledger">
+<meta name="apple-mobile-web-app-title" content="DebtTracker">
 <meta name="mobile-web-app-capable" content="yes">
 <script>
   // Register the service worker (enables offline use + installability) and
@@ -764,13 +764,13 @@ async function loadAuthStore() {
 async function saveAuthStore(value) { return idbSet(IDB_RECORD_KEY, value); }
 
 /* --- Background reminders (Periodic Background Sync). Opt-in only, and only
-   available on Chromium browsers when Ledger is installed and used enough
+   available on Chromium browsers when DebtTracker is installed and used enough
    for the browser to grant the periodic-background-sync permission — there's
    no prompt for it like there is for notifications. When unsupported, these
    functions simply no-op and the app works exactly as before. --- */
 const PERIODIC_SYNC_TAG = "ledger-periodic-check";
 // One-off Background Sync: retries a failed AI-assistant request once the
-// browser regains connectivity — the only network call Ledger ever makes.
+// browser regains connectivity — the only network call DebtTracker ever makes.
 // The queued record briefly holds the user's own API key and message text
 // UNENCRYPTED in IndexedDB (the service worker has no access to the
 // encryption key), so entries are scrubbed the instant a send attempt
@@ -825,7 +825,7 @@ async function enableBackgroundReminders() {
   try {
     const status = await navigator.permissions.query({ name: "periodic-background-sync" });
     if (status.state !== "granted") {
-      return { ok: false, reason: "This browser hasn't granted background sync yet — try again after installing and using Ledger a bit more." };
+      return { ok: false, reason: "This browser hasn't granted background sync yet — try again after installing and using DebtTracker a bit more." };
     }
     await reg.periodicSync.register(PERIODIC_SYNC_TAG, { minInterval: 12 * 60 * 60 * 1000 });
     const prevMeta = (await idbGet(IDB_SYNC_META_KEY)) || {};
@@ -1094,7 +1094,7 @@ function contactSummaries(items) {
 // - A local, rule-based assistant (default, always on): pattern-matches the
 //   question and answers from the user's own already-decrypted data. Nothing
 //   ever leaves the device for this tier; it's not an LLM, just a
-//   conversational front-end over numbers Ledger already computed.
+//   conversational front-end over numbers DebtTracker already computed.
 // - An optional "Connect your own AI" tier: the person supplies their own
 //   Anthropic API key, which is stored locally (encrypted, same as everything
 //   else) but is used to call api.anthropic.com directly from the browser.
@@ -1120,7 +1120,7 @@ function answerAssistantLocally(query, ctx) {
   const has = (...words) => words.some((w) => q.includes(w));
 
   if (has("hi", "hello", "hey", "sup", "yo ")) {
-    return "Hey! I can answer questions about your debts, receivables, and how to use Ledger. Try asking \"how much do I owe?\" or \"when will I be debt-free?\"";
+    return "Hey! I can answer questions about your debts, receivables, and how to use DebtTracker. Try asking \"how much do I owe?\" or \"when will I be debt-free?\"";
   }
   if (has("thank")) return "Anytime.";
 
@@ -1162,7 +1162,7 @@ function answerAssistantLocally(query, ctx) {
     return `You have ${ctx.dueSoon.length} item${ctx.dueSoon.length === 1 ? "" : "s"} due soon: ${names}${ctx.dueSoon.length > 3 ? ", and more" : ""}. Check the Statistics tab for the full list.`;
   }
   if (has("import", "spreadsheet", "excel", "csv")) {
-    return "Open the cloud icon in the header → \"Import from a spreadsheet.\" You can download a blank template there too, and Ledger auto-detects name, contact, balance, rate, and due date columns.";
+    return "Open the cloud icon in the header → \"Import from a spreadsheet.\" You can download a blank template there too, and DebtTracker auto-detects name, contact, balance, rate, and due date columns.";
   }
   if (has("export", "backup", "drive", "dropbox", "onedrive")) {
     return "The same cloud icon in the header has export options (CSV or full JSON), and Settings → Bring Your Own Storage lets you back up to your own Google Drive, Dropbox, or OneDrive.";
@@ -1174,7 +1174,7 @@ function answerAssistantLocally(query, ctx) {
     return "You can change your PIN anytime from Settings → Security → Change. If you're locked out entirely, use \"Forgot your PIN?\" on the login screen — you'll need the backup code you saved at setup.";
   }
   if (has("currency")) {
-    return "Settings → Currency lets you switch how amounts are displayed (USD, KES, EUR, and more). It only changes formatting, not actual values — Ledger doesn't do currency conversion.";
+    return "Settings → Currency lets you switch how amounts are displayed (USD, KES, EUR, and more). It only changes formatting, not actual values — DebtTracker doesn't do currency conversion.";
   }
   if (has("add a debt", "add debt", "new debt", "log a debt")) {
     return "Go to the \"I Owe\" tab (or Overview) and tap \"Add debt.\" You'll enter a name, balance, interest rate, and minimum payment.";
@@ -1189,13 +1189,13 @@ function answerAssistantLocally(query, ctx) {
       : "Nothing's been marked settled yet — once a debt or receivable hits zero, it moves to History automatically.";
   }
   if (has("who are you", "what are you", "what can you do", "help")) {
-    return "I'm Ledger's built-in assistant — I run entirely on your device and answer from your own data, no server involved. Ask me things like \"how much do I owe,\" \"when will I be debt-free,\" or \"how do I import a spreadsheet.\"";
+    return "I'm DebtTracker's built-in assistant — I run entirely on your device and answer from your own data, no server involved. Ask me things like \"how much do I owe,\" \"when will I be debt-free,\" or \"how do I import a spreadsheet.\"";
   }
 
   return null; // signals "no local match" to the caller
 }
 
-const ASSISTANT_FALLBACK = "I'm not sure how to answer that one locally — I can only pattern-match specific questions about your balances, payoff plan, and how to use Ledger (try \"help\" for examples). For open-ended conversation, you can connect your own AI key in the assistant settings.";
+const ASSISTANT_FALLBACK = "I'm not sure how to answer that one locally — I can only pattern-match specific questions about your balances, payoff plan, and how to use DebtTracker (try \"help\" for examples). For open-ended conversation, you can connect your own AI key in the assistant settings.";
 
 async function callAnthropicAPI(apiKey, model, history, systemPrompt) {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -1444,7 +1444,7 @@ function CredentialScreen({ mode, title, subtitle, icon = "lock", onSubmit, erro
 
         {showDisclaimer ? (
           <p className="text-center text-[var(--text-dim)] text-[11px] leading-relaxed mt-6 max-w-[300px] mx-auto">
-            Ledger is 100% private and runs entirely on your device. We never store your PIN or your data on a server — so please keep your PIN safe and save your backup code, since without them your data can't be recovered.
+            DebtTracker is 100% private and runs entirely on your device. We never store your PIN or your data on a server — so please keep your PIN safe and save your backup code, since without them your data can't be recovered.
           </p>
         ) : (
           <p className="text-center text-[var(--text-dim)] text-xs mt-6">Encrypted locally with AES-GCM. Nothing leaves this device.</p>
@@ -1466,8 +1466,8 @@ function RecoveryRevealScreen({ code, note, onContinue, continueLabel = "Continu
     try { await navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch (e) { /* ignore */ }
   };
   const download = () => {
-    const content = `Ledger recovery code\n\n${code}\n\nKeep this somewhere safe and private. Anyone with this code can reset the PIN on this device's Ledger data.\nSaved: ${new Date().toLocaleString()}`;
-    downloadFile(`ledger-recovery-code-${todayISO()}.txt`, content, "text/plain");
+    const content = `DebtTracker recovery code\n\n${code}\n\nKeep this somewhere safe and private. Anyone with this code can reset the PIN on this device's DebtTracker data.\nSaved: ${new Date().toLocaleString()}`;
+    downloadFile(`debttracker-recovery-code-${todayISO()}.txt`, content, "text/plain");
     setDownloaded(true);
   };
 
@@ -1480,7 +1480,7 @@ function RecoveryRevealScreen({ code, note, onContinue, continueLabel = "Continu
           </div>
           <h1 className="font-display text-2xl font-semibold text-center">Save your recovery code</h1>
           <p className="text-[var(--text-muted)] text-sm text-center mt-2 max-w-[300px]">
-            {note || "Since Ledger has no server and can't email you a reset link, this code is the only way back in if you forget your PIN."}
+            {note || "Since DebtTracker has no server and can't email you a reset link, this code is the only way back in if you forget your PIN."}
           </p>
         </div>
         <div className="glass rounded-3xl p-5 sm:p-7 text-center">
@@ -1495,7 +1495,7 @@ function RecoveryRevealScreen({ code, note, onContinue, continueLabel = "Continu
           </div>
           <label className={`flex items-start gap-2 text-left mb-5 ${saved ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}>
             <input type="checkbox" checked={confirmed} disabled={!saved} onChange={(e) => setConfirmed(e.target.checked)} className="mt-0.5 w-4 h-4 accent-[var(--emerald)]" />
-            <span className="text-[13px] text-[var(--text-muted)]">I've saved this somewhere safe — I understand Ledger can't recover it for me.</span>
+            <span className="text-[13px] text-[var(--text-muted)]">I've saved this somewhere safe — I understand DebtTracker can't recover it for me.</span>
           </label>
           {!saved && <p className="text-[11px] text-[var(--amber)] -mt-3 mb-5">Copy or download your code first to unlock this checkbox.</p>}
           <button onClick={onContinue} disabled={!confirmed}
@@ -1529,7 +1529,7 @@ function FactoryResetModal({ onClose, onConfirm }) {
         <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5" style={{ background: "var(--danger-dim)", border: "1px solid rgba(251,113,133,0.4)" }}>
           <Icon name="triangle-alert" size={24} className="text-[var(--danger)]" />
         </div>
-        <h2 className="font-display text-xl font-semibold mb-2">Factory reset Ledger?</h2>
+        <h2 className="font-display text-xl font-semibold mb-2">Factory reset DebtTracker?</h2>
         <p className="text-[13px] text-[var(--text-muted)] leading-relaxed mb-5">
           This permanently deletes your PIN, backup code, and every debt, receivable, and receipt stored on this device. There is no server copy to fall back on — <span className="text-[var(--danger)] font-medium">this cannot be undone.</span>
         </p>
@@ -1663,7 +1663,7 @@ function ForgotExplainScreen({ onHaveCode, onBackToLogin, onFactoryReset }) {
           </div>
           <h1 className="font-display text-2xl font-semibold text-center">Reset your PIN</h1>
           <p className="text-[var(--text-muted)] text-sm text-center mt-2 max-w-[320px]">
-            Ledger runs entirely offline with no account server, so there's no email to send a reset link to. The real, working equivalent is the recovery code you saved when you first set up your account.
+            DebtTracker runs entirely offline with no account server, so there's no email to send a reset link to. The real, working equivalent is the recovery code you saved when you first set up your account.
           </p>
         </div>
         <div className="glass rounded-3xl p-5 sm:p-6 space-y-3">
@@ -1755,7 +1755,7 @@ function DueBadge({ item }) {
   else if (d <= (item.reminderDays ?? 3)) { color = "var(--amber)"; bg = "var(--amber-dim)"; label = d === 0 ? "Due today" : `Due in ${d}d`; }
   else { label = fmtDate(item.dueDate); }
   return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-medium px-3 py-1 rounded-full" style={{ color, background: bg, border: `1px solid ${color}33` }}>
+    <span className="inline-flex items-center gap-1 text-[11px] font-medium px-3 py-1 rounded-full whitespace-nowrap shrink-0" style={{ color, background: bg, border: `1px solid ${color}33` }}>
       <Icon name="clock" size={11} /> {label}
     </span>
   );
@@ -1883,26 +1883,26 @@ function InstallInstructionsModal({ onClose }) {
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center modal-backdrop p-4" style={{ background: "rgba(20,18,13,0.55)" }} onClick={onClose}>
       <div className="modal-panel glass w-full sm:max-w-sm p-6 sm:p-7" style={{ background: "var(--surface)" }} onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="font-display text-lg font-semibold">Install Ledger</h2>
+          <h2 className="font-display text-lg font-semibold">Install DebtTracker</h2>
           <button onClick={onClose} className="icon-btn w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--surface-hover)] focus-ring"><Icon name="x" size={17} /></button>
         </div>
         {isIOS ? (
           <ol className="space-y-3 text-[13px] text-[var(--text-muted)] list-decimal pl-5">
             <li>Tap the <span className="font-medium text-[var(--text-primary)]">Share</span> icon in Safari's toolbar</li>
             <li>Scroll down and tap <span className="font-medium text-[var(--text-primary)]">Add to Home Screen</span></li>
-            <li>Tap <span className="font-medium text-[var(--text-primary)]">Add</span> — Ledger opens full-screen, offline, right from your home screen</li>
+            <li>Tap <span className="font-medium text-[var(--text-primary)]">Add</span> — DebtTracker opens full-screen, offline, right from your home screen</li>
           </ol>
         ) : isAndroid ? (
           <ol className="space-y-3 text-[13px] text-[var(--text-muted)] list-decimal pl-5">
             <li>Tap the <span className="font-medium text-[var(--text-primary)]">⋮ menu</span> in Chrome</li>
             <li>Tap <span className="font-medium text-[var(--text-primary)]">Install app</span> (or "Add to Home screen")</li>
-            <li>Confirm — Ledger now launches like any other app on your phone</li>
+            <li>Confirm — DebtTracker now launches like any other app on your phone</li>
           </ol>
         ) : (
           <ol className="space-y-3 text-[13px] text-[var(--text-muted)] list-decimal pl-5">
             <li>Look for the <span className="font-medium text-[var(--text-primary)]">install icon</span> in your browser's address bar (⊕ or a small monitor icon)</li>
             <li>Click it, then click <span className="font-medium text-[var(--text-primary)]">Install</span></li>
-            <li>Ledger opens in its own window, with an icon in your dock/taskbar</li>
+            <li>DebtTracker opens in its own window, with an icon in your dock/taskbar</li>
           </ol>
         )}
         <p className="text-[11px] text-[var(--text-dim)] mt-5 leading-relaxed">
@@ -2071,7 +2071,7 @@ function ItemCard({ item, rank, accentColor, onOpen, delay }) {
             <div className="flex items-center gap-2">
               <span className="font-display font-semibold text-[15px] truncate">{item.name}</span>
               {rank && (
-                <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full shrink-0"
+                <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full shrink-0 whitespace-nowrap"
                   style={{ background: accentColor.dim, color: accentColor.text, border: `1px solid ${accentColor.border}` }}>#{rank}</span>
               )}
             </div>
@@ -2473,7 +2473,7 @@ function DebtSnake({ items, sim, strategy }) {
             <div key={d.id} className="anim-in" style={{ animationDelay: `${i * 70}ms` }}>
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono font-bold shrink-0" style={{ background: color + "22", color, border: `1px solid ${color}55` }}>{i + 1}</span>
+                  <span className="min-w-5 h-5 px-1 rounded-full flex items-center justify-center text-[10px] font-mono font-bold shrink-0 whitespace-nowrap" style={{ background: color + "22", color, border: `1px solid ${color}55` }}>{i + 1}</span>
                   <span className="font-medium text-sm truncate">{d.name}</span>
                 </div>
                 <span className="text-[11px] font-mono text-[var(--text-dim)] shrink-0 ml-2">{monthsFromNowLabel(payoff)}</span>
@@ -2868,10 +2868,10 @@ function AssistantConnectAI({ assistant, saveData, onClose }) {
         <button onClick={onClose} className="icon-btn w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--surface-hover)] focus-ring"><Icon name="x" size={15} /></button>
       </div>
       <p className="text-[12.5px] leading-relaxed mb-4" style={{ color: "var(--text-muted)" }}>
-        Ledger's built-in assistant runs entirely on your device. Connecting your own <span style={{ fontWeight: 500, color: "var(--text-primary)" }}>Anthropic API key</span> instead lets it hold real open-ended conversations — but your messages are then sent directly from your browser to Anthropic's API. That's a genuine exception to "nothing leaves this device," so it's off by default and entirely your call.
+        DebtTracker's built-in assistant runs entirely on your device. Connecting your own <span style={{ fontWeight: 500, color: "var(--text-primary)" }}>Anthropic API key</span> instead lets it hold real open-ended conversations — but your messages are then sent directly from your browser to Anthropic's API. That's a genuine exception to "nothing leaves this device," so it's off by default and entirely your call.
       </p>
       <p className="text-[11.5px] leading-relaxed mb-5 px-3 py-2.5 rounded-xl" style={{ background: "var(--amber-dim)", color: "var(--text-muted)" }}>
-        Your key is stored encrypted on this device, the same as everything else in Ledger — but it's also sent as a plain request header to Anthropic on every message, visible to anyone with access to this browser's network tools. Consider using a key with a spend limit.
+        Your key is stored encrypted on this device, the same as everything else in DebtTracker — but it's also sent as a plain request header to Anthropic on every message, visible to anyone with access to this browser's network tools. Consider using a key with a spend limit.
       </p>
       <label className="text-[12px] font-medium mb-1.5 block" style={{ color: "var(--text-muted)" }}>Anthropic API key</label>
       <div className="relative mb-4">
@@ -2926,7 +2926,7 @@ function AssistantPanel({ data, saveData, sim, onClose }) {
   const [messages, setMessages] = useState([
     { role: "assistant", text: connected
       ? "Hey — I'm connected to your own AI key, so we can chat freely. Ask me anything."
-      : "Hey! I'm Ledger's built-in assistant. I run locally on your device and can answer questions about your balances, payoff plan, and how to use the app." },
+      : "Hey! I'm DebtTracker's built-in assistant. I run locally on your device and can answer questions about your balances, payoff plan, and how to use the app." },
   ]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -2979,9 +2979,9 @@ function AssistantPanel({ data, saveData, sim, onClose }) {
     setBusy(true);
     try {
       const summary = assistant.shareData
-        ? `The user's Ledger snapshot — total debt: ${fmtMoney(ctx.totalDebt)} across ${ctx.activeDebts.length} debts; total owed to them: ${fmtMoney(ctx.totalReceivable)}; net position: ${fmtMoney(ctx.totalReceivable - ctx.totalDebt)}; strategy: ${ctx.strategy}; projected debt-free: ${monthsFromNowLabel(ctx.sim.months)}. Use this only if relevant.`
+        ? `The user's DebtTracker snapshot — total debt: ${fmtMoney(ctx.totalDebt)} across ${ctx.activeDebts.length} debts; total owed to them: ${fmtMoney(ctx.totalReceivable)}; net position: ${fmtMoney(ctx.totalReceivable - ctx.totalDebt)}; strategy: ${ctx.strategy}; projected debt-free: ${monthsFromNowLabel(ctx.sim.months)}. Use this only if relevant.`
         : "The user has chosen not to share their financial data with you. Answer generally and do not claim to know their specific numbers.";
-      const systemPrompt = `You are a concise, friendly assistant embedded inside Ledger, a personal debt and receivables tracking app. ${summary}`;
+      const systemPrompt = `You are a concise, friendly assistant embedded inside DebtTracker, a personal debt and receivables tracking app. ${summary}`;
       const reply = await callAnthropicAPI(assistant.apiKey, assistant.model, nextMessages, systemPrompt);
       setMessages((m) => [...m, { role: "assistant", text: reply }]);
     } catch (e) {
@@ -3008,7 +3008,7 @@ function AssistantPanel({ data, saveData, sim, onClose }) {
             <Icon name="sparkles" size={15} style={{ color: "var(--accent-ink)" }} />
           </div>
           <div>
-            <div className="font-display font-bold text-[13.5px]">Ledger Assistant</div>
+            <div className="font-display font-bold text-[13.5px]">DebtTracker Assistant</div>
             <div className="text-[10.5px]" style={{ color: connected ? "var(--emerald)" : "var(--text-dim)" }}>{connected ? "Connected to your AI key" : "Local · runs on this device"}</div>
           </div>
         </div>
@@ -3045,7 +3045,7 @@ function AssistantPanel({ data, saveData, sim, onClose }) {
           {messages.length <= 1 && (
             <div className="flex flex-wrap gap-2 px-4 pb-3">
               {ASSISTANT_SUGGESTIONS.map((s) => (
-                <button key={s} onClick={() => send(s)} className="text-[11.5px] px-3 py-1.5 rounded-full" style={{ background: "var(--surface-hover)", color: "var(--text-muted)" }}>
+                <button key={s} onClick={() => send(s)} className="text-[11.5px] px-3 py-1.5 rounded-full whitespace-nowrap shrink-0" style={{ background: "var(--surface-hover)", color: "var(--text-muted)" }}>
                   {s}
                 </button>
               ))}
@@ -3069,10 +3069,10 @@ function AssistantLauncher({ data, saveData, sim }) {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Tooltip label="Ask Ledger's assistant about your finances" position="top">
+      <Tooltip label="Ask DebtTracker's assistant about your finances" position="top">
         <button onClick={() => setOpen((o) => !o)}
           className="fixed bottom-6 right-4 sm:right-8 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-lg focus-ring"
-          style={{ background: "var(--accent)", color: "var(--accent-ink)" }} aria-label="Open Ledger Assistant">
+          style={{ background: "var(--accent)", color: "var(--accent-ink)" }} aria-label="Open DebtTracker Assistant">
           <Icon name={open ? "x" : "message-circle"} size={22} />
         </button>
       </Tooltip>
@@ -3208,7 +3208,7 @@ function SettingsView({ data, saveData, onChangeCredential, onFactoryReset }) {
           <span className="text-[12px] uppercase tracking-widest text-[var(--text-dim)] font-medium">Local-first, always</span>
         </div>
         <p className="text-[12px] text-[var(--text-muted)] leading-relaxed">
-          Ledger is 100% private and runs entirely on your device. We never store your PIN or your data on a server — so keep your PIN safe and hold onto your backup code, since without them your data can't be recovered.
+          DebtTracker is 100% private and runs entirely on your device. We never store your PIN or your data on a server — so keep your PIN safe and hold onto your backup code, since without them your data can't be recovered.
         </p>
       </div>
 
@@ -3223,7 +3223,7 @@ function SettingsView({ data, saveData, onChangeCredential, onFactoryReset }) {
           <span className="text-[12px] uppercase tracking-widest text-[var(--danger)] font-medium">Danger zone</span>
         </div>
         <p className="text-[12px] text-[var(--text-muted)] leading-relaxed mb-4">
-          Lost both your PIN and backup code? There's no way to decrypt your data without one of them — but you can wipe this device's Ledger data and start completely fresh.
+          Lost both your PIN and backup code? There's no way to decrypt your data without one of them — but you can wipe this device's DebtTracker data and start completely fresh.
         </p>
         <button onClick={onFactoryReset} className="inline-flex items-center gap-2 h-10 px-4 rounded-xl text-[13px] font-display font-semibold text-[var(--danger)] focus-ring" style={{ background: "var(--danger-dim)", border: "1px solid #E8BFB8" }}>
           <Icon name="refresh-cw" size={14} /> Factory reset
@@ -3241,8 +3241,8 @@ function BYOSSection({ data, saveData }) {
 
   const backupTo = (provider, url) => {
     setBusyProvider(provider);
-    const payload = { app: "Ledger", exportedAt: new Date().toISOString(), items: data.items, extraBudget: data.extraBudget, strategy: data.strategy };
-    downloadFile(`ledger-backup-${todayISO()}.json`, JSON.stringify(payload, null, 2), "application/json");
+    const payload = { app: "DebtTracker", exportedAt: new Date().toISOString(), items: data.items, extraBudget: data.extraBudget, strategy: data.strategy };
+    downloadFile(`debttracker-backup-${todayISO()}.json`, JSON.stringify(payload, null, 2), "application/json");
     window.open(url, "_blank", "noopener,noreferrer");
     markBackupCompleted().catch(() => {});
     setTimeout(() => setBusyProvider(""), 1200);
@@ -3261,7 +3261,7 @@ function BYOSSection({ data, saveData }) {
         <h3 className="font-display font-semibold text-lg">Bring Your Own Storage</h3>
       </div>
       <p className="text-[13px] text-[var(--text-muted)] leading-relaxed mb-5">
-        Back up your data to your own Google Drive, Dropbox, or OneDrive — free, for everyone. Pick a provider below: this downloads a fresh backup file and opens that provider's site so you can drop it in. Ledger has no API access to any of these accounts; it just hands you the file.
+        Back up your data to your own Google Drive, Dropbox, or OneDrive — free, for everyone. Pick a provider below: this downloads a fresh backup file and opens that provider's site so you can drop it in. DebtTracker has no API access to any of these accounts; it just hands you the file.
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {providers.map((p) => (
@@ -3312,7 +3312,7 @@ function BackgroundRemindersSection() {
         <h3 className="font-display font-semibold text-lg">Background reminders</h3>
       </div>
       <p className="text-[13px] text-[var(--text-muted)] leading-relaxed mb-5">
-        When enabled, Ledger can notify you about entries due soon and nudge you to back up, even when the app isn't open. It never decrypts your data to do this — it only ever sees a count of what's due soon, never names, amounts, or dates. Requires installing Ledger and a Chromium-based browser (Chrome, Edge).
+        When enabled, DebtTracker can notify you about entries due soon and nudge you to back up, even when the app isn't open. It never decrypts your data to do this — it only ever sees a count of what's due soon, never names, amounts, or dates. Requires installing DebtTracker and a Chromium-based browser (Chrome, Edge).
       </p>
       <div className="flex items-center justify-between px-4 py-3.5 rounded-xl bg-[var(--surface)] border border-[var(--border-soft)]">
         <div className="flex items-center gap-2">
@@ -3410,7 +3410,7 @@ function DataPanel({ items, onClose, onImport }) {
       { label: "Settled At", get: (r) => r.settledAt || "" },
       { label: "Notes", get: (r) => r.notes },
     ]);
-    downloadFile(`ledger-entries-${todayISO()}.csv`, csv, "text/csv");
+    downloadFile(`debttracker-entries-${todayISO()}.csv`, csv, "text/csv");
   };
 
   const exportTransactionsCSV = () => {
@@ -3425,11 +3425,11 @@ function DataPanel({ items, onClose, onImport }) {
       { label: "Date", get: (r) => r.date },
       { label: "Note", get: (r) => r.note },
     ]);
-    downloadFile(`ledger-transactions-${todayISO()}.csv`, csv, "text/csv");
+    downloadFile(`debttracker-transactions-${todayISO()}.csv`, csv, "text/csv");
   };
 
   const exportJSON = () => {
-    downloadFile(`ledger-backup-${todayISO()}.json`, JSON.stringify({ items, exportedAt: new Date().toISOString() }, null, 2), "application/json");
+    downloadFile(`debttracker-backup-${todayISO()}.json`, JSON.stringify({ items, exportedAt: new Date().toISOString() }, null, 2), "application/json");
   };
 
   const exportEverything = () => {
@@ -3449,7 +3449,7 @@ function DataPanel({ items, onClose, onImport }) {
     const wb = window.XLSX.utils.book_new();
     window.XLSX.utils.book_append_sheet(wb, ws, "Entries");
     const out = window.XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    downloadFile("ledger-import-template.xlsx", out, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    downloadFile("debttracker-import-template.xlsx", out, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
   };
 
   return (
@@ -3607,21 +3607,21 @@ function InstallButton({ variant = "icon" }) {
   return (
     <>
       {variant === "icon" ? (
-        <Tooltip label="Install Ledger as an app on this device" position="bottom">
+        <Tooltip label="Install DebtTracker as an app on this device" position="bottom">
           <button onClick={handleClick} className="icon-btn h-9 w-9 rounded-xl flex items-center justify-center text-[var(--text-muted)] border border-[var(--border-soft)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] focus-ring">
             <Icon name="download" size={15} />
           </button>
         </Tooltip>
       ) : (
         <RippleButton onClick={handleClick} className="inline-flex items-center gap-2 h-12 px-6 rounded-2xl font-display font-semibold text-[15px] focus-ring" style={{ background: "var(--emerald)", color: "#211804" }}>
-          <Icon name="download" size={17} /> Install Ledger
+          <Icon name="download" size={17} /> Install DebtTracker
         </RippleButton>
       )}
       {showHelp && (
         <div className="fixed inset-0 z-[95] flex items-end sm:items-center justify-center modal-backdrop p-4" style={{ background: "rgba(20,18,13,0.55)" }} onClick={() => setShowHelp(false)}>
           <div className="modal-panel glass w-full sm:max-w-sm p-6 sm:p-7" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display text-lg font-semibold">Install Ledger</h2>
+              <h2 className="font-display text-lg font-semibold">Install DebtTracker</h2>
               <button onClick={() => setShowHelp(false)} className="icon-btn w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--surface-hover)] focus-ring"><Icon name="x" size={17} /></button>
             </div>
             <div className="space-y-4 text-[13px] text-[var(--text-muted)] leading-relaxed">
@@ -3635,9 +3635,9 @@ function InstallButton({ variant = "icon" }) {
               </div>
               <div>
                 <p className="font-semibold text-[var(--text-primary)] mb-1">On desktop (Chrome / Edge)</p>
-                <p>Look for the install icon in the address bar, or open the ⋮ menu and choose "Install Ledger."</p>
+                <p>Look for the install icon in the address bar, or open the ⋮ menu and choose "Install DebtTracker."</p>
               </div>
-              <p className="text-[11px] text-[var(--text-dim)]">This only works once Ledger is hosted at a real https:// address — a locally opened file can't be installed this way.</p>
+              <p className="text-[11px] text-[var(--text-dim)]">This only works once DebtTracker is hosted at a real https:// address — a locally opened file can't be installed this way.</p>
             </div>
           </div>
         </div>
@@ -3761,7 +3761,7 @@ function Dashboard({ data, saveData, onLock, onChangeCredential, onFactoryReset 
             <div className="w-8 h-8 rounded-xl bg-[var(--emerald-dim)] border border-[#E4C57C] flex items-center justify-center">
               <Icon name="landmark" size={16} className="text-[var(--emerald)]" />
             </div>
-            <span className="font-display font-semibold text-[17px] tracking-tight hidden sm:inline">Ledger</span>
+            <span className="font-display font-semibold text-[17px] tracking-tight hidden sm:inline">DebtTracker</span>
           </div>
           <nav ref={navRef} className="relative flex items-center gap-1 overflow-x-auto no-scrollbar">
             <div
@@ -3907,7 +3907,7 @@ const LANDING_FEATURES = [
   { icon: "trending-up", title: "Track who owes you too", desc: "Not just what you owe — log money you've lent out, with full or partial payments and a running balance for each person.", accent: "azure" },
   { icon: "shield-check", title: "Real local encryption", desc: "AES-GCM encryption, a PIN only you know, an offline backup code, and optional 2FA — all computed on your device, never on a server.", accent: "amber" },
   { icon: "users", title: "See it all by contact", desc: "One view per person — what they owe you, what you owe them, and the net of it — instead of hunting across separate entries.", accent: "violet" },
-  { icon: "file-spreadsheet", title: "Import & export freely", desc: "Bring in an Excel or CSV file and Ledger sorts it automatically. Export everything back out as CSV or JSON whenever you want.", accent: "emerald" },
+  { icon: "file-spreadsheet", title: "Import & export freely", desc: "Bring in an Excel or CSV file and DebtTracker sorts it automatically. Export everything back out as CSV or JSON whenever you want.", accent: "emerald" },
   { icon: "receipt", title: "Attach real receipts", desc: "Snap or upload a photo or PDF against any payment, so the paper trail lives right next to the number.", accent: "azure" },
   { icon: "bar-chart-3", title: "Statistics that matter", desc: "Net position, total interest, largest balances, and a full payment history — even for debts you've already paid off.", accent: "amber" },
   { icon: "cloud", title: "Bring your own storage", desc: "Back up your encrypted data to your own Google Drive, Dropbox, or OneDrive — free, with no account required.", accent: "violet" },
@@ -3951,7 +3951,7 @@ function LandingMockPreview() {
       <div className="glass rounded-3xl p-5 sm:p-6" style={{ background: "var(--surface)" }}>
         <div className="flex items-center justify-between mb-5">
           <span className="font-display font-bold text-sm" style={{ color: "var(--text-primary)" }}>Overview</span>
-          <span className="text-[11px] px-3 py-1 rounded-full" style={{ background: "var(--emerald-dim)", color: "var(--emerald)" }}>Avalanche</span>
+          <span className="text-[11px] px-3 py-1 rounded-full whitespace-nowrap" style={{ background: "var(--emerald-dim)", color: "var(--emerald)" }}>Avalanche</span>
         </div>
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="rounded-2xl p-4" style={{ background: "var(--surface-hover)" }}>
@@ -4009,7 +4009,7 @@ function LandingPage({ onLaunch }) {
             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "var(--accent)" }}>
               <Icon name="landmark" size={16} style={{ color: "var(--accent-ink)" }} />
             </div>
-            <span className="font-display font-extrabold text-[17px] tracking-tight" style={{ color: "var(--text-primary)" }}>Ledger</span>
+            <span className="font-display font-extrabold text-[17px] tracking-tight" style={{ color: "var(--text-primary)" }}>DebtTracker</span>
           </div>
           <nav className="hidden md:flex items-center gap-8 text-[13.5px]" style={{ color: "var(--text-muted)" }}>
             <button onClick={() => scrollTo("landing-features")} className="hover:opacity-70 transition-opacity">Features</button>
@@ -4030,7 +4030,7 @@ function LandingPage({ onLaunch }) {
         <div className="max-w-6xl mx-auto relative grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
           <div>
             <Reveal>
-              <span className="inline-flex items-center gap-2 text-[12px] font-medium px-4 py-1.5 rounded-full mb-6" style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-muted)" }}>
+              <span className="inline-flex items-center gap-2 text-[12px] font-medium px-4 py-1.5 rounded-full mb-6 whitespace-nowrap" style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-muted)" }}>
                 <Icon name="lock" size={12} /> 100% offline · no account · no ads
               </span>
             </Reveal>
@@ -4041,7 +4041,7 @@ function LandingPage({ onLaunch }) {
             </Reveal>
             <Reveal delay={160}>
               <p className="text-[16px] sm:text-[18px] leading-relaxed max-w-md mb-9" style={{ color: "var(--text-muted)", fontWeight: 300 }}>
-                Ledger tracks every debt and receivable, builds you a real payoff plan, and encrypts it all right on your device. No server ever sees your numbers.
+                DebtTracker tracks every debt and receivable, builds you a real payoff plan, and encrypts it all right on your device. No server ever sees your numbers.
               </p>
             </Reveal>
             <Reveal delay={240}>
@@ -4092,7 +4092,7 @@ function LandingPage({ onLaunch }) {
             <h2 className="font-display font-extrabold text-3xl sm:text-4xl mt-3 mb-6 tracking-tight" style={{ color: "var(--text-primary)" }}>Your data never leaves your device.</h2>
             <div className="space-y-5">
               {[
-                { icon: "key", t: "A PIN only you know", d: "It generates the encryption key locally — Ledger itself never sees or stores it." },
+                { icon: "key", t: "A PIN only you know", d: "It generates the encryption key locally — DebtTracker itself never sees or stores it." },
                 { icon: "badge-check", t: "A real backup code", d: "The one honest way back in if you forget your PIN, since there's no server to email you a reset link." },
                 { icon: "alarm-clock", t: "Optional two-factor", d: "Standard TOTP codes, compatible with Google Authenticator, Authy, or 1Password." },
               ].map((row, i) => (
@@ -4129,7 +4129,7 @@ function LandingPage({ onLaunch }) {
             <span className="text-[12px] uppercase tracking-widest font-semibold" style={{ color: "var(--accent)" }}>Works like a native app</span>
             <h2 className="font-display font-extrabold text-3xl sm:text-4xl mt-3 mb-5 tracking-tight" style={{ color: "var(--text-primary)" }}>Install it once. Use it offline, forever.</h2>
             <p className="text-[15px] max-w-lg mx-auto mb-10" style={{ color: "var(--text-muted)", fontWeight: 300 }}>
-              Add Ledger to your phone's home screen or your computer's dock — it opens full-screen, works without a connection, and never needs an app store.
+              Add DebtTracker to your phone's home screen or your computer's dock — it opens full-screen, works without a connection, and never needs an app store.
             </p>
           </Reveal>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10">
@@ -4169,7 +4169,7 @@ function LandingPage({ onLaunch }) {
       {/* Footer */}
       <footer className="px-5 sm:px-8 py-10 border-t" style={{ borderColor: "var(--border-soft)" }}>
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-[12px]" style={{ color: "var(--text-dim)" }}>
-          <span>© {new Date().getFullYear()} Ledger. Runs entirely on your device.</span>
+          <span>© {new Date().getFullYear()} DebtTracker. Runs entirely on your device.</span>
           <span>No accounts. No ads. No tracking.</span>
         </div>
       </footer>
@@ -4203,7 +4203,7 @@ function App() {
         resolvedAuthPhaseRef.current = "unlock";
         setPhase("landing");
       } catch (e) {
-        setError("This browser doesn't support IndexedDB, which Ledger needs to store your data securely.");
+        setError("This browser doesn't support IndexedDB, which DebtTracker needs to store your data securely.");
         resolvedAuthPhaseRef.current = "create";
         setPhase("landing");
       }
@@ -4461,7 +4461,7 @@ function App() {
     case "create":
       return wrapped(<div key="create">
         <CredentialScreen mode="pin" title="Set your Master PIN"
-          subtitle="Welcome to Ledger. This generates the encryption key that secures your data right on this device — nothing is ever sent anywhere."
+          subtitle="Welcome to DebtTracker. This generates the encryption key that secures your data right on this device — nothing is ever sent anywhere."
           onSubmit={handleCreateSubmit} error={error} submitLabel="Continue" showDisclaimer />
       </div>);
     case "confirm":
@@ -4474,7 +4474,7 @@ function App() {
     case "twofa-offer":
       return wrapped(<div key="twofa-offer"><TwoFAOfferScreen onEnable={handleTwoFAEnable} onSkip={handleTwoFASkip} /></div>);
     case "twofa-setup": {
-      const otpauthUrl = `otpauth://totp/Ledger:local?secret=${pendingTotpSecretRef.current}&issuer=Ledger&digits=6&period=30`;
+      const otpauthUrl = `otpauth://totp/DebtTracker:local?secret=${pendingTotpSecretRef.current}&issuer=DebtTracker&digits=6&period=30`;
       return wrapped(<div key="twofa-setup"><TwoFASetupScreen secret={pendingTotpSecretRef.current} otpauthUrl={otpauthUrl} onVerify={handleTwoFAVerifySetup} onSkip={handleTwoFASkip} error={error} /></div>);
     }
     case "unlock":
@@ -4493,7 +4493,7 @@ function App() {
       return wrapped(<div key="forgot-explain"><ForgotExplainScreen onHaveCode={handleForgotHaveCode} onBackToLogin={handleForgotBackToLogin} onFactoryReset={() => setShowReset(true)} /></div>);
     case "forgot-code":
       return wrapped(<div key="forgot-code">
-        <CredentialScreen mode="recovery" icon="key" title="Enter your backup code" subtitle="The 12-character code you saved when you first set up Ledger."
+        <CredentialScreen mode="recovery" icon="key" title="Enter your backup code" subtitle="The 12-character code you saved when you first set up DebtTracker."
           onSubmit={handleForgotCodeSubmit} error={error} submitLabel="Continue" />
         <p className="text-center mt-2">
           <button onClick={() => setShowReset(true)} className="text-[12px] text-[var(--text-dim)] hover:text-[var(--danger)] transition-colors focus-ring">
