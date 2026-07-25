@@ -3067,6 +3067,11 @@ function AssistantPanel({ data, saveData, sim, onClose }) {
 
 function AssistantLauncher({ data, saveData, sim }) {
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const openFromShortcut = () => setOpen(true);
+    window.addEventListener("debttracker-open-assistant", openFromShortcut);
+    return () => window.removeEventListener("debttracker-open-assistant", openFromShortcut);
+  }, []);
   return (
     <>
       <Tooltip label="Ask DebtTracker's assistant about your finances" position="top">
@@ -3665,6 +3670,15 @@ function Dashboard({ data, saveData, onLock, onChangeCredential, onFactoryReset 
     setCelebrating(true);
     setTimeout(() => setCelebrating(false), 1400);
   };
+
+  useEffect(() => {
+    const shortcut = new URLSearchParams(window.location.search).get("shortcut");
+    if (!shortcut) return;
+    if (shortcut === "add-debt") { setModalDefaultType("debt"); setModalItem({}); }
+    else if (shortcut === "add-receivable") { setModalDefaultType("receivable"); setModalItem({}); }
+    else if (shortcut === "assistant") { window.dispatchEvent(new Event("debttracker-open-assistant")); }
+    window.history.replaceState({}, "", window.location.pathname);
+  }, []);
 
   useEffect(() => {
     const recompute = () => {
