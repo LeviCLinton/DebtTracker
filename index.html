@@ -281,7 +281,7 @@
 
   .modal-backdrop{ animation: fadeIn 0.2s ease both; }
   @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
-  .modal-panel{ animation: fadeSlideIn 0.28s cubic-bezier(0.16,1,0.3,1) both; }
+  .modal-panel{ animation: fadeSlideIn 0.28s cubic-bezier(0.16,1,0.3,1) both; aspect-ratio: auto; }
 
   .icon-btn{ transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease; }
   .icon-btn:active{ transform:scale(0.9); }
@@ -296,7 +296,7 @@
   .avatar img{ width:100%; height:100%; object-fit:cover; }
 
   .dropzone{
-    border:1.5px dashed var(--border); transition: border-color 0.2s ease, background 0.2s ease;
+    border:1.5px dashed var(--border); border-radius:20px; transition: border-color 0.2s ease, background 0.2s ease;
   }
   .dropzone.drag-over{ border-color:var(--emerald); background:rgba(184,121,10,0.06); }
 
@@ -614,7 +614,7 @@ function TabDropdown({ tabs, activeTab, onSelect, className = "" }) {
         <Icon name="chevron-down" size={14} className="ml-auto shrink-0 transition-transform" style={{ transform: open ? "rotate(180deg)" : "none" }} />
       </button>
       {open && (
-        <div role="menu" className="absolute left-0 top-full mt-2 w-56 max-w-[calc(100vw-2rem)] glass anim-in overflow-hidden z-40"
+        <div role="menu" className="absolute left-0 top-full mt-2 w-56 max-w-[calc(100vw-2rem)] rounded-2xl glass anim-in overflow-hidden z-40"
           style={{ background: "var(--surface)" }}>
           {tabs.map((t) => (
             <button key={t.id} role="menuitem" onClick={() => { onSelect(t.id); setOpen(false); }}
@@ -1631,7 +1631,7 @@ function FactoryResetModal({ onClose, onConfirm }) {
 
   return (
     <div className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center modal-backdrop p-4" style={{ background: "rgba(4,6,10,0.8)" }} onClick={() => !busy && onClose()}>
-      <div className="modal-panel glass w-full sm:max-w-sm sm:rounded-3xl p-6 sm:p-7 max-h-[90vh] overflow-y-auto" style={{ borderColor: "rgba(251,113,133,0.35)" }} onClick={(e) => e.stopPropagation()}>
+      <div className="modal-panel glass w-full sm:max-w-sm sm:rounded-3xl p-6 sm:p-7 max-h-[90vh] overflow-y-auto" style={{ borderColor: "rgba(251,113,133,0.35)", borderRadius: "24px" }} onClick={(e) => e.stopPropagation()}>
         <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5" style={{ background: "var(--danger-dim)", border: "1px solid rgba(251,113,133,0.4)" }}>
           <Icon name="triangle-alert" size={24} className="text-[var(--danger)]" />
         </div>
@@ -1884,7 +1884,7 @@ function ReceiptBadge({ receipt }) {
       </Tooltip>
       {open && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center modal-backdrop p-4" style={{ background: "rgba(4,6,10,0.85)" }} onClick={(e) => { e.stopPropagation(); setOpen(false); }}>
-          <div className="modal-panel glass rounded-2xl p-4 max-w-lg w-full max-h-[85vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-panel glass rounded-2xl p-4 max-w-lg w-full max-h-[85vh] overflow-auto" style={{ borderRadius: "16px" }} onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-3 gap-3">
               <span className="text-sm font-medium truncate min-w-0 flex-1">{receipt.name || "Receipt"}</span>
               <button onClick={() => setOpen(false)} className="icon-btn w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--surface-hover)] shrink-0"><Icon name="x" size={16} /></button>
@@ -1987,7 +1987,7 @@ function InstallInstructionsModal({ onClose }) {
   const isAndroid = /Android/.test(ua);
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center modal-backdrop p-4" style={{ background: "rgba(20,18,13,0.55)" }} onClick={onClose}>
-      <div className="modal-panel glass w-full sm:max-w-sm p-6 sm:p-7" style={{ background: "var(--surface)" }} onClick={(e) => e.stopPropagation()}>
+      <div className="modal-panel glass w-full sm:max-w-sm sm:rounded-3xl p-6 sm:p-7" style={{ background: "var(--surface)", borderRadius: "24px" }} onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-display text-lg font-semibold">Install DebtTracker</h2>
           <button onClick={onClose} className="icon-btn w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--surface-hover)] focus-ring"><Icon name="x" size={17} /></button>
@@ -2240,7 +2240,7 @@ function TransactionModal({ item, onClose, onApply }) {
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center modal-backdrop p-4" style={{ background: "rgba(4,6,10,0.7)" }} onClick={onClose}>
-      <div className="modal-panel glass w-full sm:max-w-sm sm:rounded-3xl p-6 sm:p-7 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-panel glass w-full sm:max-w-sm sm:rounded-3xl p-6 sm:p-7 max-h-[90vh] overflow-y-auto" style={{ borderRadius: "24px" }} onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-display text-lg font-semibold">{verb}</h2>
           <button onClick={onClose} className="icon-btn w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--surface-hover)] focus-ring"><Icon name="x" size={17} /></button>
@@ -2356,7 +2356,7 @@ function ItemModal({ initial, defaultType, onClose, onSave, onDelete, onSettle, 
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center modal-backdrop p-4" style={{ background: "rgba(4,6,10,0.7)" }} onClick={onClose}>
-      <div className="modal-panel glass w-full sm:max-w-lg sm:rounded-3xl p-6 sm:p-7 max-h-[92vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-panel glass w-full sm:max-w-lg sm:rounded-3xl p-6 sm:p-7 max-h-[92vh] overflow-y-auto" style={{ borderRadius: "24px" }} onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-display text-xl font-semibold">{isEdit ? "Edit entry" : "Add an entry"}</h2>
           <button onClick={onClose} className="icon-btn w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--surface-hover)] focus-ring"><Icon name="x" size={18} /></button>
@@ -2856,7 +2856,7 @@ function ChangeCredentialModal({ onClose, onSubmit }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center modal-backdrop p-4" style={{ background: "rgba(4,6,10,0.7)" }} onClick={() => onClose(false)}>
-      <div className="modal-panel glass w-full sm:max-w-sm sm:rounded-3xl p-6 sm:p-7 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-panel glass w-full sm:max-w-sm sm:rounded-3xl p-6 sm:p-7 max-h-[90vh] overflow-y-auto" style={{ borderRadius: "24px" }} onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-display text-lg font-semibold">
             {step === "current" ? "Confirm it's you" : step === "new" ? "Choose a new PIN" : "Confirm your new PIN"}
@@ -3629,7 +3629,7 @@ function DataPanel({ items, onClose, onImport }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center modal-backdrop p-4" style={{ background: "rgba(4,6,10,0.7)" }} onClick={onClose}>
-      <div className="modal-panel glass w-full sm:max-w-lg sm:rounded-3xl p-6 sm:p-7 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-panel glass w-full sm:max-w-lg sm:rounded-3xl p-6 sm:p-7 max-h-[90vh] overflow-y-auto" style={{ borderRadius: "24px" }} onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-display text-xl font-semibold">Import, export &amp; backup</h2>
           <button onClick={onClose} className="icon-btn w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--surface-hover)] focus-ring"><Icon name="x" size={18} /></button>
@@ -3794,7 +3794,7 @@ function InstallButton({ variant = "icon" }) {
       )}
       {showHelp && (
         <div className="fixed inset-0 z-[95] flex items-end sm:items-center justify-center modal-backdrop p-4" style={{ background: "rgba(20,18,13,0.55)" }} onClick={() => setShowHelp(false)}>
-          <div className="modal-panel glass w-full sm:max-w-sm p-6 sm:p-7" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-panel glass w-full sm:max-w-sm sm:rounded-3xl p-6 sm:p-7" style={{ borderRadius: "24px" }} onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-display text-lg font-semibold">Install DebtTracker</h2>
               <button onClick={() => setShowHelp(false)} className="icon-btn w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--surface-hover)] focus-ring"><Icon name="x" size={17} /></button>
