@@ -3400,6 +3400,8 @@ function SettingsView({ data, saveData, onChangeCredential, onFactoryReset }) {
 
       <BYOSSection data={data} saveData={saveData} />
 
+      <SupportSettingsCard />
+
       {/* Danger zone */}
       <div className="glass rounded-3xl p-5 sm:p-6" style={{ borderColor: "#E8BFB8" }}>
         <div className="flex items-center gap-2 mb-2">
@@ -4228,7 +4230,10 @@ function FAQItem({ item, index }) {
 // touches any payment details.
 const PAYPAL_HOSTED_BUTTON_ID = "LE62364RM5E9Q";
 
-function SupportPanel({ onClose }) {
+// Shared embed: polls for the PayPal SDK (loaded in <head>) and renders the
+// hosted button into its own container. Reused by both the landing page's
+// floating panel and the in-app Settings card below.
+function PayPalSupportEmbed() {
   const containerRef = useRef(null);
   const [status, setStatus] = useState("loading"); // loading | ready | error
 
@@ -4253,6 +4258,24 @@ function SupportPanel({ onClose }) {
   }, []);
 
   return (
+    <>
+      <div ref={containerRef} className={status === "loading" ? "hidden" : ""}></div>
+      {status === "loading" && (
+        <div className="flex items-center justify-center py-6 text-[12.5px]" style={{ color: "var(--text-dim)" }}>
+          Loading payment options…
+        </div>
+      )}
+      {status === "error" && (
+        <p className="text-[12px]" style={{ color: "var(--danger)" }}>
+          Couldn't load the payment widget — check your connection and try again.
+        </p>
+      )}
+    </>
+  );
+}
+
+function SupportPanel({ onClose }) {
+  return (
     <div className="fixed bottom-24 right-4 sm:right-8 z-50 w-[calc(100vw-2rem)] sm:w-[340px] glass rounded-3xl p-5 sm:p-6 anim-in" style={{ background: "var(--surface)" }}>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2.5">
@@ -4270,17 +4293,7 @@ function SupportPanel({ onClose }) {
         donation helps keep it that way. This opens PayPal's own secure widget — your payment
         details never pass through DebtTracker itself.
       </p>
-      <div ref={containerRef} className={status === "loading" ? "hidden" : ""}></div>
-      {status === "loading" && (
-        <div className="flex items-center justify-center py-6 text-[12.5px]" style={{ color: "var(--text-dim)" }}>
-          Loading payment options…
-        </div>
-      )}
-      {status === "error" && (
-        <p className="text-[12px]" style={{ color: "var(--danger)" }}>
-          Couldn't load the payment widget — check your connection and try again.
-        </p>
-      )}
+      <PayPalSupportEmbed />
     </div>
   );
 }
@@ -4298,6 +4311,25 @@ function SupportButton() {
       </Tooltip>
       {open && <SupportPanel onClose={() => setOpen(false)} />}
     </>
+  );
+}
+
+// In-app version: a plain card for the Settings screen (no floating chrome,
+// since it already lives inside a scrollable settings page).
+function SupportSettingsCard() {
+  return (
+    <div className="glass rounded-3xl p-5 sm:p-7">
+      <div className="flex items-center gap-2 mb-2">
+        <Icon name="heart" size={17} className="text-[var(--danger)]" />
+        <h3 className="font-display font-semibold text-lg">Support DebtTracker</h3>
+      </div>
+      <p className="text-[13px] text-[var(--text-muted)] leading-relaxed mb-5">
+        DebtTracker is free, with no ads and no subscription. If it's been useful to you, a
+        small donation helps keep it that way. This loads PayPal's own secure widget — your
+        payment details never pass through DebtTracker itself.
+      </p>
+      <PayPalSupportEmbed />
+    </div>
   );
 }
 
