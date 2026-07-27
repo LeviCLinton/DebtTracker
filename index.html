@@ -70,6 +70,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://www.paypal.com/sdk/js?client-id=BAA1oREI3KoT-Px6c70Ht9fb3_4EDbMbfO9sKakle9vdPQaIcJVIRbzVW4ASAyHlLxyWMC2sfFHvXXRQtw&components=hosted-buttons&disable-funding=venmo&currency=USD" defer></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -496,6 +497,7 @@ const ICON_PATHS = {
   eye: <><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></>,
   "eye-off": <><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c6 0 10 7 10 7a17 17 0 0 1-3.1 3.87M6.6 6.6A17.3 17.3 0 0 0 2 11s4 7 10 7a9.3 9.3 0 0 0 4.4-1.1M9.9 14.1a3 3 0 1 0 4.2-4.2"/><path d="M2 2l20 20"/></>,
   key: <><circle cx="8" cy="15" r="4"/><path d="M10.85 12.15 19 4M17 6l2 2M14 9l2 2"/></>,
+  heart: <><path d="M19 14c1.5-1.5 3-3.28 3-5.5A5.5 5.5 0 0 0 12 5.5 5.5 5.5 0 0 0 2 8.5C2 10.72 3.5 12.5 5 14l7 7Z"/></>,
 };
 
 function Icon({ name, size = 18, className = "", style = {} }) {
@@ -4174,6 +4176,131 @@ function LandingMockPreview() {
   );
 }
 
+/* ============================= ABOUT ============================= */
+const ABOUT_PILLARS = [
+  { icon: "landmark", t: "Why it exists", d: "Most budgeting apps focus on spending categories. DebtTracker was built around a narrower, sharper question: what do I actually owe, who owes me, and when am I free of it?" },
+  { icon: "lock", t: "How it's built", d: "A single-page app with no backend at all. Every balance, contact, and receipt is encrypted with AES-GCM and stored only in your browser's IndexedDB." },
+  { icon: "sparkles", t: "Who it's for", d: "Anyone juggling more than one debt or informal loan — cards, personal loans, or money lent to friends and family — who wants one honest view of the whole picture." },
+];
+
+/* ============================= FAQ ============================= */
+const FAQ_ITEMS = [
+  { q: "Is DebtTracker really free?", a: "Yes. There's no subscription, no paywall, and no ads. The only optional cost is your own Anthropic API key if you choose to connect your own AI for the assistant — and that's entirely opt-in." },
+  { q: "Where is my data stored?", a: "Locally, on your own device, inside your browser's IndexedDB — encrypted with AES-GCM using a key derived from your PIN. There's no account system and no server, so nothing is ever uploaded anywhere by default." },
+  { q: "What happens if I forget my PIN?", a: "Use the backup/recovery code you saved during setup to reset it from the login screen. If you've lost both your PIN and your backup code, there's genuinely no way to decrypt your existing data — you can factory reset and start fresh, but the old data can't be recovered." },
+  { q: "Does DebtTracker work offline?", a: "Yes. Once installed (or after your first visit, thanks to the service worker), the app keeps working fully offline — the only two features that ever need a connection are live currency conversion and the optional \"connect your own AI\" assistant." },
+  { q: "Can I track money other people owe me, not just my own debts?", a: "Yes — that's the \"Owed to Me\" side of the app. You can log loans you've made, partial repayments, due dates, and see a combined net position across everyone you're financially connected to." },
+  { q: "Do you sell or share my financial data?", a: "There's nothing to sell — DebtTracker has no server collecting your data in the first place. The only data that ever leaves your device is what you explicitly opt into: currency codes for live conversion, or your messages if you connect your own AI key." },
+  { q: "Can I use this on my phone?", a: "Yes. DebtTracker is a installable Progressive Web App — add it to your home screen from your mobile browser, or build a native Android APK using the included Capacitor project (see the README)." },
+  { q: "What if I switch devices?", a: "Since everything lives locally, export a full backup (Settings → Data, or the cloud icon in the header) before switching, then import it on the new device. There's no cloud sync between devices by default." },
+];
+
+function FAQItem({ item, index }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="glass rounded-2xl overflow-hidden" style={{ background: "var(--surface)" }}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="w-full flex items-center justify-between gap-4 px-5 sm:px-6 py-4 sm:py-5 text-left focus-ring"
+      >
+        <span className="font-display font-semibold text-[15px]" style={{ color: "var(--text-primary)" }}>{item.q}</span>
+        <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300"
+          style={{ background: "var(--surface-hover)", color: "var(--text-muted)", transform: open ? "rotate(180deg)" : "none" }}>
+          <Icon name="chevron-down" size={15} />
+        </span>
+      </button>
+      <div className={`collapse-grid ${open ? "open" : ""}`}>
+        <div className="collapse-inner">
+          <p className="px-5 sm:px-6 pb-5 sm:pb-6 text-[13.5px] leading-relaxed" style={{ color: "var(--text-muted)", fontWeight: 300 }}>
+            {item.a}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================= SUPPORT / DONATE ============================= */
+// A real, disclosed exception to "nothing leaves this device": clicking this
+// button loads PayPal's own Hosted Buttons widget (from paypal.com), which
+// runs entirely inside its own embed — DebtTracker itself never sees or
+// touches any payment details.
+const PAYPAL_HOSTED_BUTTON_ID = "LE62364RM5E9Q";
+
+function SupportPanel({ onClose }) {
+  const containerRef = useRef(null);
+  const [status, setStatus] = useState("loading"); // loading | ready | error
+
+  useEffect(() => {
+    let cancelled = false;
+    let attempts = 0;
+    const tryRender = () => {
+      if (cancelled) return;
+      if (window.paypal && window.paypal.HostedButtons && containerRef.current) {
+        containerRef.current.innerHTML = "";
+        window.paypal.HostedButtons({ hostedButtonId: PAYPAL_HOSTED_BUTTON_ID }).render(containerRef.current)
+          .then(() => { if (!cancelled) setStatus("ready"); })
+          .catch(() => { if (!cancelled) setStatus("error"); });
+        return;
+      }
+      attempts += 1;
+      if (attempts > 30) { setStatus("error"); return; } // ~9s of polling before giving up
+      setTimeout(tryRender, 300);
+    };
+    tryRender();
+    return () => { cancelled = true; };
+  }, []);
+
+  return (
+    <div className="fixed bottom-24 right-4 sm:right-8 z-50 w-[calc(100vw-2rem)] sm:w-[340px] glass rounded-3xl p-5 sm:p-6 anim-in" style={{ background: "var(--surface)" }}>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: "var(--danger-dim)" }}>
+            <Icon name="heart" size={16} style={{ color: "var(--danger)" }} />
+          </div>
+          <span className="font-display font-bold text-[14.5px]" style={{ color: "var(--text-primary)" }}>Support DebtTracker</span>
+        </div>
+        <button onClick={onClose} className="icon-btn w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--surface-hover)] focus-ring" aria-label="Close">
+          <Icon name="x" size={15} />
+        </button>
+      </div>
+      <p className="text-[12.5px] leading-relaxed mb-4" style={{ color: "var(--text-muted)" }}>
+        DebtTracker is free, with no ads and no subscription. If it's been useful, a small
+        donation helps keep it that way. This opens PayPal's own secure widget — your payment
+        details never pass through DebtTracker itself.
+      </p>
+      <div ref={containerRef} className={status === "loading" ? "hidden" : ""}></div>
+      {status === "loading" && (
+        <div className="flex items-center justify-center py-6 text-[12.5px]" style={{ color: "var(--text-dim)" }}>
+          Loading payment options…
+        </div>
+      )}
+      {status === "error" && (
+        <p className="text-[12px]" style={{ color: "var(--danger)" }}>
+          Couldn't load the payment widget — check your connection and try again.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function SupportButton() {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Tooltip label="Support DebtTracker" position="top">
+        <button onClick={() => setOpen((o) => !o)}
+          className="fixed bottom-6 right-4 sm:right-8 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-lg focus-ring"
+          style={{ background: "var(--danger)", color: "#fff" }} aria-label="Support DebtTracker">
+          <Icon name={open ? "x" : "heart"} size={22} />
+        </button>
+      </Tooltip>
+      {open && <SupportPanel onClose={() => setOpen(false)} />}
+    </>
+  );
+}
+
 function LandingPage({ onLaunch }) {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
@@ -4189,6 +4316,7 @@ function LandingPage({ onLaunch }) {
   return (
     <div className="min-h-screen relative" style={{ background: "var(--bg-vignette)" }}>
       <ThemeToggle />
+      <SupportButton />
 
       {/* Nav */}
       <header className="landing-nav sticky top-0 z-40 border-b" style={{
@@ -4204,9 +4332,11 @@ function LandingPage({ onLaunch }) {
             <span className="font-display font-extrabold text-[17px] tracking-tight" style={{ color: "var(--text-primary)" }}>DebtTracker</span>
           </div>
           <nav className="hidden md:flex items-center gap-8 text-[13.5px]" style={{ color: "var(--text-muted)" }}>
+            <button onClick={() => scrollTo("landing-about")} className="hover:opacity-70 transition-opacity">About</button>
             <button onClick={() => scrollTo("landing-features")} className="hover:opacity-70 transition-opacity">Features</button>
             <button onClick={() => scrollTo("landing-security")} className="hover:opacity-70 transition-opacity">Security</button>
             <button onClick={() => scrollTo("landing-install")} className="hover:opacity-70 transition-opacity">Install</button>
+            <button onClick={() => scrollTo("landing-faq")} className="hover:opacity-70 transition-opacity">FAQ</button>
           </nav>
           <RippleButton onClick={onLaunch} className="h-10 px-5 rounded-full font-display font-bold text-[13.5px]" style={{ background: "var(--accent)", color: "var(--accent-ink)" }}>
             Open App
@@ -4258,6 +4388,43 @@ function LandingPage({ onLaunch }) {
           <LandingStat value="256-bit" label="AES-GCM encryption" delay={60} />
           <LandingStat value="0" label="Servers involved" delay={120} />
           <LandingStat value="2" label="Payoff strategies built in" delay={180} />
+        </div>
+      </section>
+
+      {/* About */}
+      <section id="landing-about" className="px-5 sm:px-8 py-20 sm:py-28">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
+          <Reveal>
+            <span className="text-[12px] uppercase tracking-widest font-semibold" style={{ color: "var(--accent)" }}>About DebtTracker</span>
+            <h2 className="font-display font-extrabold text-3xl sm:text-4xl mt-3 mb-5 tracking-tight" style={{ color: "var(--text-primary)" }}>
+              A single honest ledger for everything you owe — and everything owed to you.
+            </h2>
+            <p className="text-[15px] leading-relaxed mb-4" style={{ color: "var(--text-muted)", fontWeight: 300 }}>
+              Most money apps are built around spending. DebtTracker is built around a
+              narrower question that spreadsheets and budgeting apps rarely answer well:
+              across every card, loan, and person you've lent to, where do you actually stand?
+            </p>
+            <p className="text-[15px] leading-relaxed" style={{ color: "var(--text-muted)", fontWeight: 300 }}>
+              It runs entirely as a self-contained app on your own device — no company
+              database, no account to create, no ads to fund it. Just your numbers, a
+              payoff plan built from them, and a PIN only you know.
+            </p>
+          </Reveal>
+          <div className="space-y-5">
+            {ABOUT_PILLARS.map((row, i) => (
+              <Reveal key={row.t} delay={i * 90} scale>
+                <div className="glass rounded-3xl p-5 sm:p-6 flex items-start gap-4" style={{ background: "var(--surface)" }}>
+                  <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: "var(--emerald-dim)", border: "1px solid var(--border-soft-emerald)" }}>
+                    <Icon name={row.icon} size={19} style={{ color: "var(--emerald)" }} />
+                  </div>
+                  <div>
+                    <div className="font-display font-bold text-[15px] mb-1" style={{ color: "var(--text-primary)" }}>{row.t}</div>
+                    <div className="text-[13.5px] leading-relaxed" style={{ color: "var(--text-muted)", fontWeight: 300 }}>{row.d}</div>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -4342,6 +4509,23 @@ function LandingPage({ onLaunch }) {
           <Reveal delay={200}>
             <InstallAppButton className="px-8 py-3.5 rounded-full font-display font-bold text-[15px] inline-flex items-center gap-2" style={{ background: "var(--accent)", color: "var(--accent-ink)" }} />
           </Reveal>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="landing-faq" className="px-5 sm:px-8 py-20 sm:py-28" style={{ background: "var(--surface)" }}>
+        <div className="max-w-3xl mx-auto">
+          <Reveal className="text-center mb-12">
+            <span className="text-[12px] uppercase tracking-widest font-semibold" style={{ color: "var(--accent)" }}>Questions</span>
+            <h2 className="font-display font-extrabold text-3xl sm:text-4xl mt-3 tracking-tight" style={{ color: "var(--text-primary)" }}>Frequently asked questions</h2>
+          </Reveal>
+          <div className="space-y-3">
+            {FAQ_ITEMS.map((item, i) => (
+              <Reveal key={item.q} delay={Math.min(i, 6) * 50}>
+                <FAQItem item={item} index={i} />
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
 
