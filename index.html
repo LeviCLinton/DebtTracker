@@ -18,7 +18,7 @@
      ignored by the browser and the app still works exactly as before, just
      without an install prompt or offline caching. -->
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#B8790A">
+<meta name="theme-color" content="#F8FAFC">
 <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAACLElEQVR4nO3cwQ1BQRRAUcTC2kaiGiuFKEEhSlCIlbIstSCu75s4p4CX+fk3bzez3O+2C3jXau4DMDYBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiJZz32AX3e7HKYYezzfpxj7fTYQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASEZ94u56ekwx9nTdTDH2FYN+kQ1EIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZF8+G78oBe8/8pn/5ENRCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERLLc77Zzn4GB2UAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiI5Anb4xADtrxJ0gAAAABJRU5ErkJggg==">
 <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAACLElEQVR4nO3cwQ1BQRRAUcTC2kaiGiuFKEEhSlCIlbIstSCu75s4p4CX+fk3bzez3O+2C3jXau4DMDYBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiJZz32AX3e7HKYYezzfpxj7fTYQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASEZ94u56ekwx9nTdTDH2FYN+kQ1EIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZF8+G78oBe8/8pn/5ENRCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERLLc77Zzn4GB2UAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiI5Anb4xADtrxJ0gAAAABJRU5ErkJggg==">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -426,6 +426,8 @@
     var savedTheme = localStorage.getItem("ledger_theme");
     if (savedTheme === "dark" || (!savedTheme && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
       document.documentElement.setAttribute("data-theme", "dark");
+      var tc = document.querySelector('meta[name="theme-color"]');
+      if (tc) tc.setAttribute("content", "#1C160C");
     }
   } catch (e) { /* localStorage unavailable — default to light */ }
 </script>
@@ -1913,7 +1915,12 @@ function ThemeToggle() {
   const [dark, setDark] = useState(() => document.documentElement.getAttribute("data-theme") === "dark");
 
   useEffect(() => {
-    const sync = () => setDark(document.documentElement.getAttribute("data-theme") === "dark");
+    const sync = () => {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      setDark(isDark);
+      const tc = document.querySelector('meta[name="theme-color"]');
+      if (tc) tc.setAttribute("content", isDark ? "#1C160C" : "#F8FAFC");
+    };
     window.addEventListener("ledger-theme-change", sync);
     return () => window.removeEventListener("ledger-theme-change", sync);
   }, []);
@@ -3083,11 +3090,11 @@ function AssistantPanel({ data, saveData, sim, onClose }) {
     }
 
     setBusy(true);
+    const summary = assistant.shareData
+      ? `The user's DebtTracker snapshot — total debt: ${fmtMoney(ctx.totalDebt)} across ${ctx.activeDebts.length} debts; total owed to them: ${fmtMoney(ctx.totalReceivable)}; net position: ${fmtMoney(ctx.totalReceivable - ctx.totalDebt)}; strategy: ${ctx.strategy}; projected debt-free: ${monthsFromNowLabel(ctx.sim.months)}. Use this only if relevant.`
+      : "The user has chosen not to share their financial data with you. Answer generally and do not claim to know their specific numbers.";
+    const systemPrompt = `You are a concise, friendly assistant embedded inside DebtTracker, a personal debt and receivables tracking app. ${summary}`;
     try {
-      const summary = assistant.shareData
-        ? `The user's DebtTracker snapshot — total debt: ${fmtMoney(ctx.totalDebt)} across ${ctx.activeDebts.length} debts; total owed to them: ${fmtMoney(ctx.totalReceivable)}; net position: ${fmtMoney(ctx.totalReceivable - ctx.totalDebt)}; strategy: ${ctx.strategy}; projected debt-free: ${monthsFromNowLabel(ctx.sim.months)}. Use this only if relevant.`
-        : "The user has chosen not to share their financial data with you. Answer generally and do not claim to know their specific numbers.";
-      const systemPrompt = `You are a concise, friendly assistant embedded inside DebtTracker, a personal debt and receivables tracking app. ${summary}`;
       const reply = await callAnthropicAPI(assistant.apiKey, assistant.model, nextMessages, systemPrompt);
       setMessages((m) => [...m, { role: "assistant", text: reply }]);
     } catch (e) {
