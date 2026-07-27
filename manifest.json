@@ -9,8 +9,8 @@
   "id": "./debt-dashboard.html",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#F6E4B8",
-  "theme_color": "#B8790A",
+  "background_color": "#F8FAFC",
+  "theme_color": "#F8FAFC",
   "launch_handler": {
     "client_mode": "auto"
   },
