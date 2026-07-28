@@ -4507,7 +4507,16 @@ function PayPalSupportEmbed() {
 
   return (
     <>
-      <div ref={containerRef} className={status === "loading" ? "hidden" : ""}></div>
+      <div
+        ref={containerRef}
+        className={status === "loading" ? "hidden" : ""}
+        style={{
+          background: "#FFFFFF",
+          borderRadius: "14px",
+          padding: status === "loading" ? 0 : "14px",
+          border: status === "loading" ? "none" : "1px solid #E5E7EB",
+        }}
+      ></div>
       {status === "loading" && (
         <div className="flex items-center justify-center py-6 text-[12.5px]" style={{ color: "var(--text-dim)" }}>
           Loading payment options…
