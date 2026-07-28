@@ -4091,6 +4091,7 @@ function Dashboard({ data, saveData, onLock, onChangeCredential, onFactoryReset 
         />
       )}
       {showDataPanel && <DataPanel items={items} onClose={() => setShowDataPanel(false)} onImport={handleImportRows} />}
+      <SupportButton stacked />
       <AssistantLauncher data={data} saveData={saveData} sim={sim} />
     </div>
   );
@@ -4274,9 +4275,9 @@ function PayPalSupportEmbed() {
   );
 }
 
-function SupportPanel({ onClose }) {
+function SupportPanel({ onClose, stacked = false }) {
   return (
-    <div className="fixed bottom-24 right-4 sm:right-8 z-50 w-[calc(100vw-2rem)] sm:w-[340px] glass rounded-3xl p-5 sm:p-6 anim-in" style={{ background: "var(--surface)" }}>
+    <div className={`fixed ${stacked ? "bottom-[168px]" : "bottom-24"} right-4 sm:right-8 z-50 w-[calc(100vw-2rem)] sm:w-[340px] glass rounded-3xl p-5 sm:p-6 anim-in`} style={{ background: "var(--surface)" }}>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: "var(--danger-dim)" }}>
@@ -4298,18 +4299,21 @@ function SupportPanel({ onClose }) {
   );
 }
 
-function SupportButton() {
+// stacked=true positions the trigger just above the chat assistant's own
+// launcher (used inside the Dashboard, where both widgets are visible at
+// once). stacked=false (default) is the landing page's standalone position.
+function SupportButton({ stacked = false }) {
   const [open, setOpen] = useState(false);
   return (
     <>
       <Tooltip label="Support DebtTracker" position="top">
         <button onClick={() => setOpen((o) => !o)}
-          className="fixed bottom-6 right-4 sm:right-8 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-lg focus-ring"
+          className={`fixed ${stacked ? "bottom-24" : "bottom-6"} right-4 sm:right-8 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-lg focus-ring`}
           style={{ background: "var(--danger)", color: "#fff" }} aria-label="Support DebtTracker">
           <Icon name={open ? "x" : "heart"} size={22} />
         </button>
       </Tooltip>
-      {open && <SupportPanel onClose={() => setOpen(false)} />}
+      {open && <SupportPanel onClose={() => setOpen(false)} stacked={stacked} />}
     </>
   );
 }
@@ -4585,6 +4589,21 @@ function LandingPage({ onLaunch }) {
   );
 }
 
+/* --- Decides whether to skip the marketing landing page and go straight to
+   the sign-in/create-PIN screen. True when: (a) launched from the manifest's
+   start_url or a shortcut — both carry a query marker — which is exactly how
+   an installed PWA (Android/iOS/desktop, including PWABuilder-wrapped
+   downloads) opens every time, or (b) the display is already running in
+   standalone mode as a fallback for installs that predate this marker.
+   A plain browser visit to the bare URL still sees the landing page. --- */
+function shouldSkipLandingPage() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("source") === "pwa" || params.has("shortcut")) return true;
+  } catch (e) { /* ignore */ }
+  return isStandalone();
+}
+
 function App() {
   const [phase, setPhase] = useState("loading");
   const [error, setError] = useState("");
@@ -4604,16 +4623,17 @@ function App() {
 
   useEffect(() => {
     (async () => {
+      const skipLanding = shouldSkipLandingPage();
       try {
         const parsed = await loadAuthStore();
-        if (!parsed) { resolvedAuthPhaseRef.current = "create"; setPhase("landing"); return; }
+        if (!parsed) { resolvedAuthPhaseRef.current = "create"; setPhase(skipLanding ? "create" : "landing"); return; }
         storeRef.current = parsed;
         resolvedAuthPhaseRef.current = "unlock";
-        setPhase("landing");
+        setPhase(skipLanding ? "unlock" : "landing");
       } catch (e) {
         setError("This browser doesn't support IndexedDB, which DebtTracker needs to store your data securely.");
         resolvedAuthPhaseRef.current = "create";
-        setPhase("landing");
+        setPhase(skipLanding ? "create" : "landing");
       }
     })();
   }, []);
