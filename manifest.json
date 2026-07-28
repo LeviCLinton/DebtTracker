@@ -4,7 +4,7 @@
   "description": "Track what you owe and who owes you — encrypted, private, and 100% offline on your device.",
   "lang": "en",
   "dir": "ltr",
-  "start_url": "./debt-dashboard.html",
+  "start_url": "./debt-dashboard.html?source=pwa",
   "scope": "./",
   "id": "./debt-dashboard.html",
   "display": "standalone",
