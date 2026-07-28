@@ -29,9 +29,52 @@
   // Register the service worker (enables offline use + installability) and
   // capture the browser's install prompt so the app can trigger it from a
   // normal in-app button instead of relying on a hidden browser-menu item.
+  //
+  // Also keeps the app quietly up to date: whenever a new version is
+  // deployed, the browser downloads it in the background the next time the
+  // person is online, and DebtTracker swaps over to it automatically — no
+  // "update available" prompt, no forced interruption mid-task. It waits
+  // for a moment when nothing would be lost (no dialog open, no half-typed
+  // PIN, no focused unsaved field) before reloading, since that's the only
+  // way a page can actually pick up new code. This never touches stored
+  // data — everything is already saved to IndexedDB as it's entered, well
+  // before any of this runs.
+  function __dtIsSafeToReload() {
+    try {
+      if (document.querySelector(".modal-backdrop")) return false; // any open dialog
+      if (document.querySelector(".pin-dot.filled")) return false; // a PIN is mid-entry
+      const ae = document.activeElement;
+      if (ae && (ae.tagName === "INPUT" || ae.tagName === "TEXTAREA") && ae.value) return false; // unsaved typing
+    } catch (e) { /* ignore */ }
+    return true;
+  }
+  let __dtReloadScheduled = false;
+  function __dtScheduleSeamlessReload() {
+    if (__dtReloadScheduled) return;
+    __dtReloadScheduled = true;
+    const attempt = () => {
+      if (__dtIsSafeToReload()) window.location.reload();
+      else setTimeout(attempt, 4000);
+    };
+    attempt();
+  }
+
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+      navigator.serviceWorker.register("./service-worker.js").then((reg) => {
+        const checkForUpdate = () => { reg.update().catch(() => {}); };
+        checkForUpdate();
+        window.addEventListener("online", checkForUpdate);
+        document.addEventListener("visibilitychange", () => { if (!document.hidden) checkForUpdate(); });
+        setInterval(checkForUpdate, 60 * 60 * 1000); // hourly safety net for long-lived tabs
+      }).catch(() => {});
+
+      // Fires once the new service worker actually takes control (it calls
+      // skipWaiting()/clients.claim() on its own) — that's our one true
+      // signal a newer version has finished downloading and is ready.
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        __dtScheduleSeamlessReload();
+      });
     });
   }
   window.__deferredInstallPrompt = null;
