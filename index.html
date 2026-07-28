@@ -3232,7 +3232,7 @@ function AssistantLauncher({ data, saveData, sim }) {
   }, []);
   return (
     <>
-      <Tooltip label="Ask DebtTracker's assistant about your finances" position="top">
+      <Tooltip label="Chat with DebtTracker's built-in assistant — runs locally on your device, or connect your own AI key for open-ended chat" position="top">
         <button onClick={() => setOpen((o) => !o)}
           className="fixed bottom-6 right-4 sm:right-8 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-lg focus-ring"
           style={{ background: "var(--accent)", color: "var(--accent-ink)" }} aria-label="Open DebtTracker Assistant">
@@ -4349,7 +4349,7 @@ function SupportButton({ stacked = false }) {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Tooltip label="Support DebtTracker" position="top">
+      <Tooltip label="DebtTracker is free with no ads — a small donation via PayPal helps keep it that way" position="top">
         <button onClick={() => setOpen((o) => !o)}
           className={`fixed ${stacked ? "bottom-24" : "bottom-6"} right-4 sm:right-8 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-lg focus-ring`}
           style={{ background: "var(--danger)", color: "#fff" }} aria-label="Support DebtTracker">
@@ -4626,6 +4626,9 @@ function LandingPage({ onLaunch }) {
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-[12px]" style={{ color: "var(--text-dim)" }}>
           <span>© {new Date().getFullYear()} DebtTracker. Runs entirely on your device.</span>
           <span>No accounts. No ads. No tracking.</span>
+          <a href="mailto:leviclinton2020@gmail.com" className="inline-flex items-center gap-1.5 hover:opacity-70 transition-opacity" style={{ color: "var(--text-dim)" }}>
+            <Icon name="mail" size={13} /> Having an issue? Email support
+          </a>
         </div>
       </footer>
     </div>
