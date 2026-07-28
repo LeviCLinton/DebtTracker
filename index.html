@@ -7,11 +7,69 @@
 <title>DebtTracker - Personal Debt & Receivable Tracker</title>
   <!-- The short snippet displayed under your title in search results -->
 <meta name="description" content="Track your personal debts, loans, and receivables completely offline. Keep your financial records private and secure with DebtTracker.">
+<meta name="keywords" content="debt tracker app, free debt tracker, pay off debt fast, debt snowball vs avalanche, debt payoff app 2026, track money owed to you, loan tracker app, credit card debt, debt payoff calculator, personal finance app, offline budgeting app, debt free">
 
 <!-- Open Graph tags (controls how your app looks when shared on social media or WhatsApp) -->
 <meta property="og:title" content="DebtTracker - Personal Debt Tracker">
 <meta property="og:description" content="An offline-first tool to manage what you owe and what you are owed.">
 <meta property="og:image" content="https://yourdomain.com/assets/app-preview.png">
+
+<!-- Structured data for the blog section below: present in the raw page
+     source (not gated behind any JS interaction), so search engines can
+     index these posts and their topics even without executing scripts. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "name": "DebtTracker Blog",
+  "url": "https://yourdomain.com/#landing-blog",
+  "publisher": { "@type": "Organization", "name": "DebtTracker" },
+  "blogPost": [
+    {
+      "@type": "BlogPosting",
+      "headline": "Debt Snowball vs. Debt Avalanche: Which Payoff Method Actually Gets You Debt-Free Faster?",
+      "description": "A side-by-side comparison of the two most searched debt payoff strategies, with a worked example to help you pick the right one.",
+      "keywords": "debt snowball vs avalanche, debt payoff strategy, pay off debt fast",
+      "datePublished": "2026-07-01"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "How to Pay Off Debt Fast: A Step-by-Step Plan for 2026",
+      "description": "A practical, six-step plan for building a real debt payoff strategy, from listing balances to picking an extra monthly budget.",
+      "keywords": "how to pay off debt fast, debt payoff plan 2026, get out of debt",
+      "datePublished": "2026-07-08"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Best Free Debt Tracker Apps in 2026: What to Actually Look For",
+      "description": "The criteria that actually matter when choosing a debt tracker app, and why most only track half of your financial picture.",
+      "keywords": "best free debt tracker app, debt payoff app 2026, debt tracker app",
+      "datePublished": "2026-07-15"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "How to Track Money Someone Owes You (Without the Awkward Spreadsheet)",
+      "description": "A simple system for logging personal loans and IOUs, following up gracefully, and seeing your true net financial position.",
+      "keywords": "track money owed to you, loan tracker app, personal loan tracker",
+      "datePublished": "2026-07-20"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Is It Safe to Use a Debt Tracking App? A Plain-English Guide to Data Privacy",
+      "description": "What to check before trusting any app with your financial data, and how offline, zero-knowledge apps reduce the risk entirely.",
+      "keywords": "is a debt tracker app safe, debt app data privacy, encrypted finance app",
+      "datePublished": "2026-07-24"
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Credit Card Debt in 2026: How Much Do Americans Really Owe?",
+      "description": "A look at current credit card debt trends and interest rates, and what they mean for building your own payoff plan.",
+      "keywords": "credit card debt statistics 2026, average credit card debt, debt free 2026",
+      "datePublished": "2026-07-27"
+    }
+  ]
+}
+</script>
 
 <!-- PWA: installable app metadata. Requires being served over HTTPS (or
      localhost) — opened directly as a local file:// this manifest is simply
@@ -4229,6 +4287,152 @@ const ABOUT_PILLARS = [
   { icon: "sparkles", t: "Who it's for", d: "Anyone juggling more than one debt or informal loan — cards, personal loans, or money lent to friends and family — who wants one honest view of the whole picture." },
 ];
 
+/* ============================= BLOG ============================= */
+// Content here is written to mirror, word-for-word on the headline/description,
+// the BlogPosting structured data declared in <head> — search engines should
+// never see promises in JSON-LD that the visible page doesn't actually keep.
+const BLOG_POSTS = [
+  {
+    slug: "snowball-vs-avalanche",
+    category: "Payoff Strategy",
+    date: "July 1, 2026",
+    readTime: "5 min read",
+    title: "Debt Snowball vs. Debt Avalanche: Which Payoff Method Actually Gets You Debt-Free Faster?",
+    excerpt: "A side-by-side comparison of the two most searched debt payoff strategies, with a worked example to help you pick the right one.",
+    content: [
+      "If you've searched \u201Cdebt snowball vs avalanche,\u201D you've probably found two confident, opposite answers. Both are legitimate — they just optimize for different things, and the right one depends on what actually keeps you paying.",
+      "The Debt Snowball method orders your debts smallest balance first, regardless of interest rate. You pay the minimum on everything else and throw every spare dollar at the smallest debt until it hits zero — then roll that payment into the next-smallest. The appeal is momentum: knocking out a full balance early, even a small one, is a real psychological win that keeps people consistent for the long haul.",
+      "The Debt Avalanche method orders your debts by highest interest rate first. Mathematically, this is the cheaper path — you pay less total interest over the life of your payoff plan, since your money attacks the balance that's costing you the most every month.",
+      "Here's a simple worked example: imagine three debts — a $500 store card at 26% APR, a $4,000 personal loan at 11% APR, and a $9,000 car loan at 6% APR, with $300 extra to put toward debt each month. Avalanche pays off the store card first anyway (it's also the smallest here), but on debts where the highest-rate balance isn't the smallest one, Avalanche and Snowball can produce noticeably different orders — and different total interest paid.",
+      "The honest answer to \u201Cwhich is better\u201D is: Avalanche saves more money on paper, but only if you actually stick with it. If quick wins are what keep you motivated, Snowball that gets you to the finish line beats a mathematically optimal plan you abandon in month four.",
+      "DebtTracker builds both strategies in as a single toggle — switch between Snowball and Avalanche and watch your payoff order, interest total, and projected debt-free date recalculate instantly, so you can actually compare your own numbers instead of a generic example.",
+    ],
+  },
+  {
+    slug: "pay-off-debt-fast-2026",
+    category: "Getting Out of Debt",
+    date: "July 8, 2026",
+    readTime: "6 min read",
+    title: "How to Pay Off Debt Fast: A Step-by-Step Plan for 2026",
+    excerpt: "A practical, six-step plan for building a real debt payoff strategy, from listing balances to picking an extra monthly budget.",
+    content: [
+      "\u201CHow to pay off debt fast\u201D is one of the most searched personal finance questions every year, and for good reason — carrying multiple balances with no clear plan is exhausting. Here's a plan that works regardless of how much you owe.",
+      "Step 1 — List every single debt. Credit cards, personal loans, car loans, money borrowed from family — all of it, with the current balance, interest rate, and minimum payment. You can't build a real plan around a partial picture.",
+      "Step 2 — Pick a payoff strategy. Debt Avalanche (highest interest first) saves the most money; Debt Snowball (smallest balance first) tends to keep people motivated longer. Either is far better than no order at all.",
+      "Step 3 — Find your real extra monthly budget. Not an aspirational number — an honest one, after minimums and essentials. Even an extra $50–$100 a month meaningfully shortens a payoff timeline when it's aimed at one debt at a time instead of spread thin.",
+      "Step 4 — Automate the minimums. The fastest way to derail a payoff plan is a missed payment triggering a rate hike or a late fee. Automate what you can, and keep manual control only over the extra payment.",
+      "Step 5 — Track progress visually, not just mentally. Seeing a balance shrink — and a real, dated \u201Cdebt-free by\u201D projection — is what turns a plan into a habit you keep.",
+      "Step 6 — Recalculate whenever life changes. A raise, a new expense, an extra windfall — feed it back into your plan immediately rather than losing months of progress to an outdated number.",
+      "This is exactly the loop DebtTracker is built around: list your debts, choose Snowball or Avalanche, set your extra budget, and get a real, recalculating freedom date — instead of a static spreadsheet you have to update by hand.",
+    ],
+  },
+  {
+    slug: "best-free-debt-tracker-apps-2026",
+    category: "App Comparisons",
+    date: "July 15, 2026",
+    readTime: "5 min read",
+    title: "Best Free Debt Tracker Apps in 2026: What to Actually Look For",
+    excerpt: "The criteria that actually matter when choosing a debt tracker app, and why most only track half of your financial picture.",
+    content: [
+      "Search \u201Cbest free debt tracker app\u201D and you'll find a long list of options — most of them budgeting apps with debt features bolted on, or debt calculators with no ongoing tracking. Here's what actually separates a genuinely useful free debt tracker app from a lead-generation funnel for a paid tier.",
+      "Does it track both sides? Most tools only track what you owe. Very few also track what other people owe you — money lent to friends, family, or roommates — even though that's just as real a part of your financial picture. A true net position needs both.",
+      "Is it actually free, or free-with-a-paywall? Many \u201Cfree debt tracker apps\u201D cap you at a small number of debts, hide the payoff calculator behind a subscription, or require linking your bank account to unlock features. Read the fine print before you commit your data.",
+      "Does it work without an internet connection? A debt tracker you can only check with a signal isn't always there when you need it — on a flight, in a basement, or the moment you're standing in a store deciding whether to put something on a card.",
+      "Does it actually protect your data? \u201CFree\u201D often means your financial data is the product. Look for whether the app requires linking your bank account (a real security exposure) versus manual entry, whether it's encrypted, and whether it even has a server at all.",
+      "Does it support real payoff strategies? Snowball and Avalanche support, a visual payoff timeline, and a projected debt-free date turn a list of numbers into an actual plan.",
+      "DebtTracker was built to check every one of these boxes: debts and receivables together, genuinely free with no paywalled tier, fully offline-capable, encrypted with no server at all, and both major payoff strategies built in from day one.",
+    ],
+  },
+  {
+    slug: "track-money-owed-to-you",
+    category: "IOUs & Receivables",
+    date: "July 20, 2026",
+    readTime: "4 min read",
+    title: "How to Track Money Someone Owes You (Without the Awkward Spreadsheet)",
+    excerpt: "A simple system for logging personal loans and IOUs, following up gracefully, and seeing your true net financial position.",
+    content: [
+      "Lending money to a friend, splitting a bill, or covering rent for a roommate is easy in the moment — remembering exactly who owes what, months later, is where it falls apart. \u201CTrack money owed to you\u201D and \u201CIOU tracker app\u201D are both searched constantly for exactly this reason.",
+      "The usual approach — a mental note, a text thread, or a notes-app list — breaks down fast. Partial repayments get lost, dates get fuzzy, and eventually someone has to have an awkward conversation to reconstruct what's actually owed.",
+      "A good system for tracking IOUs needs a few specific things: one place per person (not scattered across conversations), support for partial payments logged over time, a due date or reminder if the loan was meant to be repaid by a certain time, and a note field for context — what the loan was for, and how it was agreed.",
+      "It also helps to see your net position, not just individual entries: if you owe a friend $50 but they owe you $200 from a separate loan, what actually matters is the $150 net — not two disconnected numbers.",
+      "DebtTracker's \u201COwed to Me\u201D side handles exactly this: log any amount lent, record partial repayments as they come in, set a due date and reminder window, and see everyone you're financially connected to grouped in one Contacts view with a clear net position for each person.",
+    ],
+  },
+  {
+    slug: "is-a-debt-tracker-app-safe",
+    category: "Privacy & Security",
+    date: "July 24, 2026",
+    readTime: "6 min read",
+    title: "Is It Safe to Use a Debt Tracking App? A Plain-English Guide to Data Privacy",
+    excerpt: "What to check before trusting any app with your financial data, and how offline, zero-knowledge apps reduce the risk entirely.",
+    content: [
+      "Handing a stranger's app your debts, balances, and interest rates is a reasonable thing to be cautious about. \u201CIs it safe to use a debt tracker app\u201D is a fair question, and the honest answer depends entirely on how the app is actually built — not what its marketing page claims.",
+      "Start by asking: does it require linking your bank account? That's convenient, but it also means a third party has read access to your real transactions, and a breach of that provider affects you even if you never had a security incident yourself.",
+      "Next: where does your data actually live? Many apps store everything on a company server, which means your financial details exist somewhere outside your control indefinitely — including after you delete the app.",
+      "Then: is anything actually encrypted, and who holds the key? Encryption \u201Cat rest\u201D means little if the company itself holds the decryption key and could theoretically read your data, or be compelled to hand it over.",
+      "The strongest privacy model — sometimes called \u201Czero-knowledge\u201D — is one where the app has no server at all for your personal data to reach, and your information is encrypted on your own device using a key only you have. In that model, there's nothing to breach, sell, or subpoena, because it was never collected in the first place.",
+      "DebtTracker follows exactly that model: every entry is encrypted with AES-256 using a key derived from your PIN through 210,000 rounds of PBKDF2, stored only in your browser's local storage, with no account system or company server involved at any point.",
+    ],
+  },
+  {
+    slug: "credit-card-debt-2026-statistics",
+    category: "Money News",
+    date: "July 27, 2026",
+    readTime: "4 min read",
+    title: "Credit Card Debt in 2026: How Much Do Americans Really Owe?",
+    excerpt: "A look at current credit card debt trends and interest rates, and what they mean for building your own payoff plan.",
+    content: [
+      "Credit card debt in the United States has climbed past $1.25 trillion, with average APRs sitting above 21% — meaning a balance carried month to month is quietly getting more expensive every year interest rates stay elevated.",
+      "Student loan debt adds another roughly $1.77 trillion on top of that, and heading into 2026, paying down debt has become the single most common financial resolution Americans report — ahead of saving, investing, or any other goal.",
+      "Among people actively working on debt reduction, credit card balances are the single most targeted category, likely because of that combination of high interest rates and revolving, easy-to-grow balances.",
+      "What does this mean practically? If credit cards are part of your own balance sheet, they're very likely the most expensive dollar-for-dollar debt you're carrying — which is exactly the kind of debt the Avalanche strategy is built to attack first.",
+      "Whatever the national numbers look like, the plan that actually gets you out is the one built around your specific balances and rates — which is what a real debt payoff tracker, not a general statistic, can show you.",
+    ],
+  },
+];
+
+function BlogPostCard({ post, delay }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Reveal delay={delay} scale>
+      <article className="glass rounded-3xl overflow-hidden" style={{ background: "var(--surface)" }}>
+        <button
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          className="w-full text-left p-6 sm:p-7 focus-ring"
+        >
+          <div className="flex items-center gap-3 mb-3 flex-wrap">
+            <span className="text-[11px] font-semibold uppercase tracking-widest px-3 py-1 rounded-full"
+              style={{ background: "var(--emerald-dim)", color: "var(--emerald)" }}>{post.category}</span>
+            <span className="text-[11.5px]" style={{ color: "var(--text-dim)" }}>{post.date} · {post.readTime}</span>
+          </div>
+          <h3 className="font-display font-bold text-[19px] sm:text-[21px] leading-snug mb-2" style={{ color: "var(--text-primary)" }}>
+            {post.title}
+          </h3>
+          <p className="text-[13.5px] leading-relaxed" style={{ color: "var(--text-muted)", fontWeight: 300 }}>
+            {post.excerpt}
+          </p>
+          <span className="inline-flex items-center gap-1.5 mt-4 text-[13px] font-semibold" style={{ color: "var(--accent)" }}>
+            {open ? "Show less" : "Read full article"}
+            <Icon name="chevron-down" size={14} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.2s ease" }} />
+          </span>
+        </button>
+        <div className={`collapse-grid ${open ? "open" : ""}`}>
+          <div className="collapse-inner">
+            <div className="px-6 sm:px-7 pb-7 pt-1 space-y-3 border-t" style={{ borderColor: "var(--border-soft)" }}>
+              {post.content.map((para, i) => (
+                <p key={i} className="text-[13.5px] leading-relaxed pt-3" style={{ color: "var(--text-muted)", fontWeight: 300 }}>
+                  {para}
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+      </article>
+    </Reveal>
+  );
+}
+
 /* ============================= FAQ ============================= */
 const FAQ_ITEMS = [
   { q: "Is DebtTracker really free?", a: "Yes. There's no subscription, no paywall, and no ads. The only optional cost is your own Anthropic API key if you choose to connect your own AI for the assistant — and that's entirely opt-in." },
@@ -4415,6 +4619,7 @@ function LandingPage({ onLaunch }) {
             <button onClick={() => scrollTo("landing-features")} className="hover:opacity-70 transition-opacity">Features</button>
             <button onClick={() => scrollTo("landing-security")} className="hover:opacity-70 transition-opacity">Security</button>
             <button onClick={() => scrollTo("landing-install")} className="hover:opacity-70 transition-opacity">Install</button>
+            <button onClick={() => scrollTo("landing-blog")} className="hover:opacity-70 transition-opacity">Blog</button>
             <button onClick={() => scrollTo("landing-faq")} className="hover:opacity-70 transition-opacity">FAQ</button>
           </nav>
           <RippleButton onClick={onLaunch} className="h-10 px-5 rounded-full font-display font-bold text-[13.5px]" style={{ background: "var(--accent)", color: "var(--accent-ink)" }}>
@@ -4588,6 +4793,26 @@ function LandingPage({ onLaunch }) {
           <Reveal delay={200}>
             <InstallAppButton className="px-8 py-3.5 rounded-full font-display font-bold text-[15px] inline-flex items-center gap-2" style={{ background: "var(--accent)", color: "var(--accent-ink)" }} />
           </Reveal>
+        </div>
+      </section>
+
+      {/* Blog */}
+      <section id="landing-blog" className="px-5 sm:px-8 py-20 sm:py-28">
+        <div className="max-w-5xl mx-auto">
+          <Reveal className="max-w-xl mb-14">
+            <span className="text-[12px] uppercase tracking-widest font-semibold" style={{ color: "var(--accent)" }}>From the blog</span>
+            <h2 className="font-display font-extrabold text-3xl sm:text-4xl mt-3 tracking-tight" style={{ color: "var(--text-primary)" }}>
+              Debt payoff guides, IOU tips, and privacy explainers.
+            </h2>
+            <p className="text-[15px] mt-4" style={{ color: "var(--text-muted)", fontWeight: 300 }}>
+              Practical answers to the questions people search most when they're trying to get out of debt.
+            </p>
+          </Reveal>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {BLOG_POSTS.map((post, i) => (
+              <BlogPostCard key={post.slug} post={post} delay={(i % 4) * 70} />
+            ))}
+          </div>
         </div>
       </section>
 
