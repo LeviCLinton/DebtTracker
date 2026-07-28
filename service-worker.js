@@ -4,9 +4,10 @@
 // without a registered service worker, Chrome/Edge won't consider the page
 // installable at all, and there'd be nothing serving the app when offline.
 
-const CACHE_VERSION = "ledger-v1";
+const CACHE_VERSION = "ledger-v2";
 const APP_SHELL = [
   "./debt-dashboard.html",
+  "./debt-dashboard.html?source=pwa",
   "./manifest.json",
   "./icon-192.png",
   "./icon-512.png",
@@ -204,7 +205,7 @@ self.addEventListener("notificationclick", (event) => {
       for (const client of clientList) {
         if (client.url.includes("debt-dashboard.html") && "focus" in client) return client.focus();
       }
-      if (self.clients.openWindow) return self.clients.openWindow("./debt-dashboard.html");
+      if (self.clients.openWindow) return self.clients.openWindow("./debt-dashboard.html?source=pwa");
     })
   );
 });
@@ -223,7 +224,16 @@ self.addEventListener("fetch", (event) => {
           caches.open(CACHE_VERSION).then((cache) => cache.put(req, copy));
           return res;
         })
-        .catch(() => caches.match(req).then((cached) => cached || caches.match("./debt-dashboard.html")))
+        .catch(() => caches.match(req).then((cached) => {
+          if (cached) return cached;
+          // Exact request wasn't cached (e.g. a fresh install offline) —
+          // fall back to whichever shell variant matches the intent: the
+          // pwa-launch shell if that's what was requested, otherwise the
+          // plain page (which shows the marketing landing page).
+          const isPwaLaunch = req.url.includes("source=pwa");
+          return caches.match(isPwaLaunch ? "./debt-dashboard.html?source=pwa" : "./debt-dashboard.html")
+            .then((fallback) => fallback || caches.match("./debt-dashboard.html"));
+        }))
     );
     return;
   }
