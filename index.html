@@ -76,7 +76,7 @@
      ignored by the browser and the app still works exactly as before, just
      without an install prompt or offline caching. -->
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#F8FAFC">
+<meta name="theme-color" content="#FBF8F4">
 <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAACLElEQVR4nO3cwQ1BQRRAUcTC2kaiGiuFKEEhSlCIlbIstSCu75s4p4CX+fk3bzez3O+2C3jXau4DMDYBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiJZz32AX3e7HKYYezzfpxj7fTYQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASEZ94u56ekwx9nTdTDH2FYN+kQ1EIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZF8+G78oBe8/8pn/5ENRCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERLLc77Zzn4GB2UAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiI5Anb4xADtrxJ0gAAAABJRU5ErkJggg==">
 <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAACLElEQVR4nO3cwQ1BQRRAUcTC2kaiGiuFKEEhSlCIlbIstSCu75s4p4CX+fk3bzez3O+2C3jXau4DMDYBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiJZz32AX3e7HKYYezzfpxj7fTYQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASEZ94u56ekwx9nTdTDH2FYN+kQ1EIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZF8+G78oBe8/8pn/5ENRCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERLLc77Zzn4GB2UAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiI5Anb4xADtrxJ0gAAAABJRU5ErkJggg==">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -177,34 +177,41 @@
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    /* ===== Enterprise Fintech — slate/navy base, sky-blue CTA, mint/coral status colors ===== */
-    --bg-base:#F8FAFC;
-    --bg-vignette:linear-gradient(160deg, #FFFFFF 0%, #F8FAFC 45%, #F1F5F9 100%);
+    /* ===== Warm Ledger — an editorial, near-monochrome paper canvas with
+       ink-black CTAs and a single warm terracotta punctuation color, in
+       place of the old slate/sky-blue fintech palette. Buttons were already
+       pill-shaped and cards already rectangular (by earlier request), so
+       this redesign is carried almost entirely by re-tinting the existing
+       tokens: color is rationed to functional emphasis, and every debt/
+       receivable meaning (green = owed to you, amber = due soon, red =
+       overdue) is preserved — only the finish is new. ===== */
+    --bg-base:#FBF8F4;
+    --bg-vignette:linear-gradient(160deg, #FFFFFF 0%, #FBF8F4 45%, #F6F0E7 100%);
     --surface:#FFFFFF;
     --surface-raised:#FFFFFF;
-    --surface-hover:#F1F5F9;
-    --border:#E2E8F0;
-    --border-soft:#EDF2F7;
-    --text-primary:#0F172A;
-    --text-muted:#475569;
-    --text-dim:#94A3B8;
-    --emerald:#10B981;
-    --emerald-dim:#D1FAE5;
-    --azure:#0EA5E9;
-    --azure-dim:#E0F2FE;
-    --amber:#F59E0B;
-    --amber-dim:#FEF3C7;
-    --danger:#EF4444;
-    --danger-dim:#FEE2E2;
-    --violet:#0F172A;
-    --accent:#0EA5E9;
+    --surface-hover:#F5F1EA;
+    --border:#EDE6DA;
+    --border-soft:#F2ECE1;
+    --text-primary:#1E1A16;
+    --text-muted:#6E6759;
+    --text-dim:#A79E8C;
+    --emerald:#2E8F63;
+    --emerald-dim:#E4F2EA;
+    --azure:#4C7A9E;
+    --azure-dim:#E6EEF3;
+    --amber:#C97A3D;
+    --amber-dim:#F7E7D8;
+    --danger:#B3503D;
+    --danger-dim:#F5E3DE;
+    --violet:#6B4A38;
+    --accent:#1E1A16;
     --accent-ink:#FFFFFF;
-    --accent-border:#BAE6FD;
-    --border-soft-emerald:#6EE7B7;
-    --border-soft-azure:#7DD3FC;
+    --accent-border:#D8CDBB;
+    --border-soft-emerald:#A9D9C1;
+    --border-soft-azure:#AFC9DB;
     --glass-bg:rgba(255,255,255,0.75);
     --glass-border:var(--border-soft);
-    --header-bg:rgba(248,250,252,0.85);
+    --header-bg:rgba(251,248,244,0.85);
   }
   html[data-theme="dark"]{
     /* ===== Ledger Noir — a near-black canvas with graphite hairline borders
@@ -429,9 +436,9 @@
   .auth-bg-orb{ position:fixed; border-radius:50%; filter:blur(70px); opacity:0.13; pointer-events:none; z-index:0; }
   .motion-bg-canvas{ position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; display:block; }
   .dash-bg-orb{ position:fixed; border-radius:50%; filter:blur(90px); opacity:0.07; pointer-events:none; z-index:0; }
-  .auth-orb-1{ width:440px; height:440px; background:radial-gradient(circle, #D4A552, transparent 70%); top:-140px; left:-120px; animation: driftA 15s ease-in-out infinite; }
-  .auth-orb-2{ width:400px; height:400px; background:radial-gradient(circle, #14120D, transparent 70%); bottom:-160px; right:-120px; animation: driftB 17s ease-in-out infinite; }
-  .auth-orb-3{ width:260px; height:260px; background:radial-gradient(circle, #B8790A, transparent 70%); top:40%; right:10%; animation: driftA 20s ease-in-out infinite reverse; opacity:0.5; }
+  .auth-orb-1{ width:440px; height:440px; background:radial-gradient(circle, #C97A3D, transparent 70%); top:-140px; left:-120px; animation: driftA 15s ease-in-out infinite; }
+  .auth-orb-2{ width:400px; height:400px; background:radial-gradient(circle, #1E1A16, transparent 70%); bottom:-160px; right:-120px; animation: driftB 17s ease-in-out infinite; }
+  .auth-orb-3{ width:260px; height:260px; background:radial-gradient(circle, #E2A278, transparent 70%); top:40%; right:10%; animation: driftA 20s ease-in-out infinite reverse; opacity:0.5; }
   @keyframes driftA{ 0%,100%{ transform:translate(0,0) scale(1); } 50%{ transform:translate(36px,26px) scale(1.06); } }
   @keyframes driftB{ 0%,100%{ transform:translate(0,0) scale(1); } 50%{ transform:translate(-30px,-34px) scale(1.05); } }
 
@@ -1510,8 +1517,8 @@ function MotionBackground() {
 
     const tick = () => {
       const dark = isDark();
-      const dotRGB = dark ? "140,124,246" : "184,121,10";   // --accent, theme-matched
-      const lineRGB = dark ? "140,124,246" : "20,18,13";     // --accent / --text-primary
+      const dotRGB = dark ? "140,124,246" : "30,26,22";   // --accent, theme-matched
+      const lineRGB = dark ? "140,124,246" : "30,26,22";     // --accent / --text-primary
       const particles = particlesRef.current;
       const mouse = mouseRef.current;
       ctx.clearRect(0, 0, width, height);
@@ -2043,7 +2050,7 @@ function ThemeToggle() {
       const isDark = document.documentElement.getAttribute("data-theme") === "dark";
       setDark(isDark);
       const tc = document.querySelector('meta[name="theme-color"]');
-      if (tc) tc.setAttribute("content", isDark ? "#07080B" : "#F8FAFC");
+      if (tc) tc.setAttribute("content", isDark ? "#07080B" : "#FBF8F4");
     };
     window.addEventListener("ledger-theme-change", sync);
     return () => window.removeEventListener("ledger-theme-change", sync);
