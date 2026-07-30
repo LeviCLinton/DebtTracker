@@ -248,21 +248,206 @@
     --glass-border:rgba(140,124,246,0.16);
     --header-bg:rgba(7,8,11,0.85);
   }
-  html[data-theme="dark"] ::-webkit-scrollbar-thumb{ background:#2E313B; }
-  html[data-theme="dark"] .slider-track{ background:#1C1E24; }
-  html[data-theme="dark"] .slider-track::-webkit-slider-thumb{ border-color:#0C0D12; }
-  html[data-theme="dark"] .pin-dot{ border-color:#2E313B; }
-  html[data-theme="dark"] .item-card:hover{ border-color:#453C8C; }
-  html[data-theme="dark"] .auth-orb-1{ background:radial-gradient(circle, #6A5CD6, transparent 70%); }
-  html[data-theme="dark"] .auth-orb-2{ background:radial-gradient(circle, #8C7CF6, transparent 70%); }
-  html[data-theme="dark"] .auth-orb-3{ background:radial-gradient(circle, #B3A6FF, transparent 70%); }
   /* Signature touch: numbers rendered in the app's monospace face pick up a
      faint violet tint by default in dark mode — an echo of Ledger Violet
      marking figures the way a signature color marks code elsewhere. Any
      balance that already carries its own explicit color (debt vs.
      receivable, positive vs. negative) overrides this via inline style, so
      the semantic color-coding elsewhere in the app is untouched. */
-  html[data-theme="dark"] .font-mono{ color:#B3A6FF; }
+  html[data-theme="dark"] .font-mono{ color:var(--violet); }
+
+  /* ===== Alternate color themes =====
+     "Warm Ledger" above is the default and needs no extra rule — it's just
+     the base :root / html[data-theme="dark"] pair. Each alternate below
+     defines both a light and a dark variant under its own
+     [data-color-theme="..."] attribute, selectable independently from the
+     light/dark mode toggle in Settings → Appearance. The combined selector
+     (both attributes together) carries higher specificity than either the
+     base rules or the single-attribute rule above, so it always wins
+     cleanly for every variable it redefines. */
+
+  html[data-color-theme="ocean"]{
+    /* Ocean — a cool slate-and-sky-blue palette for anyone who prefers the
+       original fintech-blue feel over the warm terracotta default. */
+    --bg-base:#F5F9FC;
+    --bg-vignette:linear-gradient(160deg, #FFFFFF 0%, #F5F9FC 45%, #EEF5FA 100%);
+    --surface:#FFFFFF;
+    --surface-raised:#FFFFFF;
+    --surface-hover:#EAF3F9;
+    --border:#DCE8F0;
+    --border-soft:#E8F1F7;
+    --text-primary:#0E2233;
+    --text-muted:#4C6B80;
+    --text-dim:#8FA9BA;
+    --emerald:#1E9E74;
+    --emerald-dim:#DCF3E9;
+    --azure:#1C7FC2;
+    --azure-dim:#DCEEFC;
+    --amber:#D48A2E;
+    --amber-dim:#FBEBD6;
+    --danger:#D1483F;
+    --danger-dim:#FBE1DF;
+    --violet:#5C4FBF;
+    --accent:#1C7FC2;
+    --accent-ink:#FFFFFF;
+    --accent-border:#BEDCF0;
+    --border-soft-emerald:#9FE0C4;
+    --border-soft-azure:#9BCDEF;
+    --glass-bg:rgba(255,255,255,0.75);
+    --glass-border:var(--border-soft);
+    --header-bg:rgba(245,249,252,0.85);
+  }
+  html[data-color-theme="ocean"][data-theme="dark"]{
+    --bg-base:#060B12;
+    --bg-vignette:linear-gradient(160deg, #0A121C 0%, #060B12 45%, #040810 100%);
+    --surface:#0C1420;
+    --surface-raised:#101A28;
+    --surface-hover:#16202F;
+    --border:#20303F;
+    --border-soft:#182432;
+    --text-primary:#EAF2F8;
+    --text-muted:#93ABBD;
+    --text-dim:#576A79;
+    --emerald:#33D999;
+    --emerald-dim:#0E2B21;
+    --azure:#4FB1FF;
+    --azure-dim:#0F2436;
+    --amber:#F2A94A;
+    --amber-dim:#2C210F;
+    --danger:#FF7166;
+    --danger-dim:#2C1613;
+    --violet:#8C7CF6;
+    --accent:#4FB1FF;
+    --accent-ink:#04101C;
+    --accent-border:#2C5170;
+    --border-soft-emerald:#1F6E52;
+    --border-soft-azure:#2C6C95;
+    --glass-bg:rgba(12,20,32,0.72);
+    --glass-border:rgba(79,177,255,0.16);
+    --header-bg:rgba(6,11,18,0.85);
+  }
+
+  html[data-color-theme="emerald"]{
+    /* Emerald — a forest-green palette for a calmer, growth-oriented feel. */
+    --bg-base:#F6FAF7;
+    --bg-vignette:linear-gradient(160deg, #FFFFFF 0%, #F6FAF7 45%, #EFF7F1 100%);
+    --surface:#FFFFFF;
+    --surface-raised:#FFFFFF;
+    --surface-hover:#EAF5EE;
+    --border:#DCEBE1;
+    --border-soft:#E9F4EC;
+    --text-primary:#132A1D;
+    --text-muted:#486955;
+    --text-dim:#8FAC9A;
+    --emerald:#1E8F5A;
+    --emerald-dim:#DBF0E3;
+    --azure:#2E7FAE;
+    --azure-dim:#DDEEF7;
+    --amber:#C68A2E;
+    --amber-dim:#F8EAD3;
+    --danger:#C24B3E;
+    --danger-dim:#F7E0DC;
+    --violet:#5B6E3F;
+    --accent:#1E8F5A;
+    --accent-ink:#FFFFFF;
+    --accent-border:#BEE3CB;
+    --border-soft-emerald:#93D9AE;
+    --border-soft-azure:#9FCBE3;
+    --glass-bg:rgba(255,255,255,0.75);
+    --glass-border:var(--border-soft);
+    --header-bg:rgba(246,250,247,0.85);
+  }
+  html[data-color-theme="emerald"][data-theme="dark"]{
+    --bg-base:#060B08;
+    --bg-vignette:linear-gradient(160deg, #0A130E 0%, #060B08 45%, #040805 100%);
+    --surface:#0C1610;
+    --surface-raised:#101C15;
+    --surface-hover:#16241C;
+    --border:#213A2A;
+    --border-soft:#182A1F;
+    --text-primary:#E9F5EE;
+    --text-muted:#8FB8A0;
+    --text-dim:#4F6E5C;
+    --emerald:#3EE397;
+    --emerald-dim:#0E2B1C;
+    --azure:#57B4E0;
+    --azure-dim:#0F2530;
+    --amber:#F2B24E;
+    --amber-dim:#2C210F;
+    --danger:#FF7566;
+    --danger-dim:#2C1613;
+    --violet:#8C7CF6;
+    --accent:#3EE397;
+    --accent-ink:#04140C;
+    --accent-border:#215A3D;
+    --border-soft-emerald:#1F6E52;
+    --border-soft-azure:#2C5D7A;
+    --glass-bg:rgba(12,22,16,0.72);
+    --glass-border:rgba(62,227,151,0.16);
+    --header-bg:rgba(6,11,8,0.85);
+  }
+
+  html[data-color-theme="classic"]{
+    /* Classic — a neutral, near-grayscale palette for anyone who wants the
+       app to stay out of the way entirely. */
+    --bg-base:#F7F7F8;
+    --bg-vignette:linear-gradient(160deg, #FFFFFF 0%, #F7F7F8 45%, #F0F0F2 100%);
+    --surface:#FFFFFF;
+    --surface-raised:#FFFFFF;
+    --surface-hover:#EFEFF1;
+    --border:#E1E1E4;
+    --border-soft:#ECECEF;
+    --text-primary:#17181B;
+    --text-muted:#5B5D63;
+    --text-dim:#9B9DA3;
+    --emerald:#28966B;
+    --emerald-dim:#DCEFE6;
+    --azure:#3E6FA8;
+    --azure-dim:#DEE9F3;
+    --amber:#B07C33;
+    --amber-dim:#F3E7D4;
+    --danger:#B14B41;
+    --danger-dim:#F3DFDC;
+    --violet:#4A4D57;
+    --accent:#17181B;
+    --accent-ink:#FFFFFF;
+    --accent-border:#D3D3D8;
+    --border-soft-emerald:#9BD3BC;
+    --border-soft-azure:#A9C4DD;
+    --glass-bg:rgba(255,255,255,0.75);
+    --glass-border:var(--border-soft);
+    --header-bg:rgba(247,247,248,0.85);
+  }
+  html[data-color-theme="classic"][data-theme="dark"]{
+    --bg-base:#0A0A0B;
+    --bg-vignette:linear-gradient(160deg, #0F0F10 0%, #0A0A0B 45%, #070708 100%);
+    --surface:#111113;
+    --surface-raised:#151517;
+    --surface-hover:#1C1C1F;
+    --border:#2A2A2E;
+    --border-soft:#1F1F22;
+    --text-primary:#F1F1F2;
+    --text-muted:#A0A0A6;
+    --text-dim:#5E5E64;
+    --emerald:#37C98D;
+    --emerald-dim:#102A20;
+    --azure:#5A9CDD;
+    --azure-dim:#101E2A;
+    --amber:#E0A24E;
+    --amber-dim:#2A1F10;
+    --danger:#E8695E;
+    --danger-dim:#2A1614;
+    --violet:#9B9EAA;
+    --accent:#F1F1F2;
+    --accent-ink:#111113;
+    --accent-border:#3A3A3F;
+    --border-soft-emerald:#1F6E52;
+    --border-soft-azure:#2C4D6E;
+    --glass-bg:rgba(17,17,19,0.72);
+    --glass-border:rgba(255,255,255,0.08);
+    --header-bg:rgba(10,10,11,0.85);
+  }
+
   *{box-sizing:border-box;}
   html,body{background:var(--bg-base);}
   html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
@@ -286,7 +471,7 @@
   .font-mono{font-family:'IBM Plex Mono',monospace;}
   ::-webkit-scrollbar{width:8px;height:8px;}
   ::-webkit-scrollbar-track{background:transparent;}
-  ::-webkit-scrollbar-thumb{background:#DDD9CF;border-radius:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
   ::selection{background:rgba(184,121,10,0.25);}
 
   @keyframes fadeSlideIn{
@@ -337,7 +522,7 @@
     appearance:none;
     height:6px;
     border-radius:999px;
-    background:#EEEBE3;
+    background:var(--surface-hover);
     outline:none;
   }
   .slider-track::-webkit-slider-thumb{
@@ -346,16 +531,16 @@
     background:var(--emerald);
     box-shadow:0 0 0 4px rgba(184,121,10,0.18), 0 2px 6px rgba(20,18,13,0.18);
     cursor:pointer;
-    border:2px solid #E7E4DC;
+    border:2px solid var(--surface);
     transition:transform 0.15s ease;
   }
   .slider-track::-webkit-slider-thumb:hover{transform:scale(1.12);}
   .slider-track::-moz-range-thumb{
     width:18px;height:18px;border-radius:50%;
-    background:var(--emerald); border:2px solid #E7E4DC; cursor:pointer;
+    background:var(--emerald); border:2px solid var(--surface); cursor:pointer;
   }
 
-  .pin-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid #D6D2C6;transition:all 0.18s ease;}
+  .pin-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--border);transition:all 0.18s ease;}
   .pin-dot.filled{background:var(--emerald);border-color:var(--emerald);box-shadow:0 0 10px rgba(184,121,10,0.45);}
 
   .keypad-btn{ transition:all 0.12s ease; font-family:'Newsreader',serif; }
@@ -365,7 +550,7 @@
   .tab-btn{ transition: all 0.18s ease; }
 
   .item-card{ transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease; }
-  .item-card:hover{ border-color:#D9D5C9; }
+  .item-card:hover{ border-color:var(--accent-border); }
 
   .item-card-tilt{ transition: transform 0.12s ease-out, border-color 0.18s ease, box-shadow 0.18s ease; will-change: transform; position:relative; overflow:hidden; }
   .item-card-tilt::before{
@@ -436,9 +621,9 @@
   .auth-bg-orb{ position:fixed; border-radius:50%; filter:blur(70px); opacity:0.13; pointer-events:none; z-index:0; }
   .motion-bg-canvas{ position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; display:block; }
   .dash-bg-orb{ position:fixed; border-radius:50%; filter:blur(90px); opacity:0.07; pointer-events:none; z-index:0; }
-  .auth-orb-1{ width:440px; height:440px; background:radial-gradient(circle, #C97A3D, transparent 70%); top:-140px; left:-120px; animation: driftA 15s ease-in-out infinite; }
-  .auth-orb-2{ width:400px; height:400px; background:radial-gradient(circle, #1E1A16, transparent 70%); bottom:-160px; right:-120px; animation: driftB 17s ease-in-out infinite; }
-  .auth-orb-3{ width:260px; height:260px; background:radial-gradient(circle, #E2A278, transparent 70%); top:40%; right:10%; animation: driftA 20s ease-in-out infinite reverse; opacity:0.5; }
+  .auth-orb-1{ width:440px; height:440px; background:radial-gradient(circle, var(--amber), transparent 70%); top:-140px; left:-120px; animation: driftA 15s ease-in-out infinite; }
+  .auth-orb-2{ width:400px; height:400px; background:radial-gradient(circle, var(--accent), transparent 70%); bottom:-160px; right:-120px; animation: driftB 17s ease-in-out infinite; }
+  .auth-orb-3{ width:260px; height:260px; background:radial-gradient(circle, var(--violet), transparent 70%); top:40%; right:10%; animation: driftA 20s ease-in-out infinite reverse; opacity:0.5; }
   @keyframes driftA{ 0%,100%{ transform:translate(0,0) scale(1); } 50%{ transform:translate(36px,26px) scale(1.06); } }
   @keyframes driftB{ 0%,100%{ transform:translate(0,0) scale(1); } 50%{ transform:translate(-30px,-34px) scale(1.05); } }
 
@@ -551,15 +736,23 @@
 <body>
 <script>
   // Applied synchronously before React mounts, so there's no flash of the
-  // wrong theme while the app boots.
+  // wrong theme (or wrong color theme) while the app boots.
+  var LEDGER_THEME_BG = {
+    ledger: { light: "#FBF8F4", dark: "#07080B" },
+    ocean: { light: "#F5F9FC", dark: "#060B12" },
+    emerald: { light: "#F6FAF7", dark: "#060B08" },
+    classic: { light: "#F7F7F8", dark: "#0A0A0B" },
+  };
   try {
     var savedTheme = localStorage.getItem("ledger_theme");
-    if (savedTheme === "dark" || (!savedTheme && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-      document.documentElement.setAttribute("data-theme", "dark");
-      var tc = document.querySelector('meta[name="theme-color"]');
-      if (tc) tc.setAttribute("content", "#07080B");
-    }
-  } catch (e) { /* localStorage unavailable — default to light */ }
+    var savedColorTheme = localStorage.getItem("ledger_color_theme") || "ledger";
+    var isDarkMode = savedTheme === "dark" || (!savedTheme && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    if (isDarkMode) document.documentElement.setAttribute("data-theme", "dark");
+    if (savedColorTheme !== "ledger") document.documentElement.setAttribute("data-color-theme", savedColorTheme);
+    var bgPair = LEDGER_THEME_BG[savedColorTheme] || LEDGER_THEME_BG.ledger;
+    var tc = document.querySelector('meta[name="theme-color"]');
+    if (tc) tc.setAttribute("content", isDarkMode ? bgPair.dark : bgPair.light);
+  } catch (e) { /* localStorage unavailable — default to light Ledger theme */ }
 </script>
 <div id="root"></div>
 
@@ -1476,6 +1669,24 @@ function MotionBackground() {
     let width = 0, height = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
     const isDark = () => document.documentElement.getAttribute("data-theme") === "dark";
 
+    // Reads the *actual* active theme's accent color (whichever of the four
+    // color themes, light or dark, is currently applied) rather than
+    // assuming one hardcoded value — so the particles always match
+    // whatever the person picked in Settings → Appearance.
+    const hexToRgbString = (hex) => {
+      const clean = (hex || "").trim().replace("#", "");
+      if (clean.length !== 6) return "140,124,246";
+      const n = parseInt(clean, 16);
+      return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`;
+    };
+    const accentRgbRef = { current: "140,124,246" };
+    const refreshAccentColor = () => {
+      const val = getComputedStyle(document.documentElement).getPropertyValue("--accent");
+      accentRgbRef.current = hexToRgbString(val);
+    };
+    refreshAccentColor();
+    window.addEventListener("ledger-theme-change", refreshAccentColor);
+
     // Kept deliberately sparse and low-opacity — this is a minimalist, premium
     // app, so the motion should read as "alive" in peripheral vision, not as
     // a decorative centerpiece competing with real content.
@@ -1517,8 +1728,8 @@ function MotionBackground() {
 
     const tick = () => {
       const dark = isDark();
-      const dotRGB = dark ? "140,124,246" : "30,26,22";   // --accent, theme-matched
-      const lineRGB = dark ? "140,124,246" : "30,26,22";     // --accent / --text-primary
+      const dotRGB = accentRgbRef.current;
+      const lineRGB = accentRgbRef.current;
       const particles = particlesRef.current;
       const mouse = mouseRef.current;
       ctx.clearRect(0, 0, width, height);
@@ -1576,6 +1787,7 @@ function MotionBackground() {
       window.removeEventListener("resize", onResize);
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseleave", onMouseLeave);
+      window.removeEventListener("ledger-theme-change", refreshAccentColor);
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
@@ -2049,8 +2261,9 @@ function ThemeToggle() {
     const sync = () => {
       const isDark = document.documentElement.getAttribute("data-theme") === "dark";
       setDark(isDark);
+      const colorTheme = document.documentElement.getAttribute("data-color-theme") || "ledger";
       const tc = document.querySelector('meta[name="theme-color"]');
-      if (tc) tc.setAttribute("content", isDark ? "#07080B" : "#FBF8F4");
+      if (tc) tc.setAttribute("content", isDark ? getColorTheme(colorTheme).dark.bg : getColorTheme(colorTheme).light.bg);
     };
     window.addEventListener("ledger-theme-change", sync);
     return () => window.removeEventListener("ledger-theme-change", sync);
@@ -3052,19 +3265,53 @@ function ChangeCredentialModal({ onClose, onSubmit }) {
   );
 }
 
+// Mirrors the [data-color-theme="..."] CSS blocks defined in <style> —
+// swatch hexes here are just for the picker preview; the actual palette
+// always comes from the CSS custom properties, never from this object.
+const COLOR_THEMES = [
+  { id: "ledger", label: "Ledger", desc: "Warm paper canvas, ink-black accent.",
+    light: { bg: "#FBF8F4", accent: "#1E1A16" }, dark: { bg: "#07080B", accent: "#8C7CF6" } },
+  { id: "ocean", label: "Ocean", desc: "Cool slate and sky-blue.",
+    light: { bg: "#F5F9FC", accent: "#1C7FC2" }, dark: { bg: "#060B12", accent: "#4FB1FF" } },
+  { id: "emerald", label: "Emerald", desc: "Forest green, calm and grounded.",
+    light: { bg: "#F6FAF7", accent: "#1E8F5A" }, dark: { bg: "#060B08", accent: "#3EE397" } },
+  { id: "classic", label: "Classic", desc: "Near-grayscale — stays out of the way.",
+    light: { bg: "#F7F7F8", accent: "#17181B" }, dark: { bg: "#0A0A0B", accent: "#F1F1F2" } },
+];
+function getColorTheme(id) { return COLOR_THEMES.find((t) => t.id === id) || COLOR_THEMES[0]; }
+
 function AppearanceCard() {
   const [dark, setDark] = useState(() => document.documentElement.getAttribute("data-theme") === "dark");
+  const [colorTheme, setColorTheme] = useState(() => document.documentElement.getAttribute("data-color-theme") || "ledger");
 
   useEffect(() => {
-    const sync = () => setDark(document.documentElement.getAttribute("data-theme") === "dark");
+    const sync = () => {
+      setDark(document.documentElement.getAttribute("data-theme") === "dark");
+      setColorTheme(document.documentElement.getAttribute("data-color-theme") || "ledger");
+    };
     window.addEventListener("ledger-theme-change", sync);
     return () => window.removeEventListener("ledger-theme-change", sync);
   }, []);
+
+  const applyMetaColor = (isDark, themeId) => {
+    const tc = document.querySelector('meta[name="theme-color"]');
+    if (tc) tc.setAttribute("content", isDark ? getColorTheme(themeId).dark.bg : getColorTheme(themeId).light.bg);
+  };
 
   const setTheme = (isDark) => {
     setDark(isDark);
     document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
     try { localStorage.setItem("ledger_theme", isDark ? "dark" : "light"); } catch (e) { /* ignore */ }
+    applyMetaColor(isDark, colorTheme);
+    window.dispatchEvent(new Event("ledger-theme-change"));
+  };
+
+  const pickColorTheme = (id) => {
+    setColorTheme(id);
+    if (id === "ledger") document.documentElement.removeAttribute("data-color-theme");
+    else document.documentElement.setAttribute("data-color-theme", id);
+    try { localStorage.setItem("ledger_color_theme", id); } catch (e) { /* ignore */ }
+    applyMetaColor(dark, id);
     window.dispatchEvent(new Event("ledger-theme-change"));
   };
 
@@ -3074,7 +3321,7 @@ function AppearanceCard() {
         <Icon name={dark ? "moon" : "sun"} size={17} className="text-[var(--emerald)]" />
         <h3 className="font-display font-semibold text-lg">Appearance</h3>
       </div>
-      <div className="grid grid-cols-2 gap-1 p-1 rounded-2xl bg-[var(--surface)] border border-[var(--border-soft)]">
+      <div className="grid grid-cols-2 gap-1 p-1 rounded-2xl bg-[var(--surface)] border border-[var(--border-soft)] mb-6">
         <button onClick={() => setTheme(false)} className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-display font-medium transition-all"
           style={{ background: !dark ? "var(--emerald-dim)" : "transparent", color: !dark ? "var(--emerald)" : "var(--text-muted)", border: !dark ? "1px solid var(--accent-border)" : "1px solid transparent" }}>
           <Icon name="sun" size={14} /> Light
@@ -3083,6 +3330,31 @@ function AppearanceCard() {
           style={{ background: dark ? "var(--emerald-dim)" : "transparent", color: dark ? "var(--emerald)" : "var(--text-muted)", border: dark ? "1px solid var(--accent-border)" : "1px solid transparent" }}>
           <Icon name="moon" size={14} /> Dark
         </button>
+      </div>
+
+      <div className="text-[12px] text-[var(--text-muted)] font-medium mb-3">Color theme</div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {COLOR_THEMES.map((t) => {
+          const preview = dark ? t.dark : t.light;
+          const selected = colorTheme === t.id;
+          return (
+            <Tooltip key={t.id} label={t.desc} position="top">
+              <button onClick={() => pickColorTheme(t.id)}
+                className="w-full flex flex-col items-center gap-2 px-3 py-3 rounded-2xl focus-ring transition-all"
+                style={{ background: selected ? "var(--surface-hover)" : "transparent", border: `1.5px solid ${selected ? "var(--accent)" : "var(--border-soft)"}` }}>
+                <span className="relative w-9 h-9 rounded-full flex items-center justify-center" style={{ background: preview.bg, border: "1px solid var(--border-soft)" }}>
+                  <span className="w-4 h-4 rounded-full" style={{ background: preview.accent }}></span>
+                  {selected && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: "var(--emerald)" }}>
+                      <Icon name="check-circle" size={11} style={{ color: "var(--accent-ink)" }} />
+                    </span>
+                  )}
+                </span>
+                <span className="text-[12.5px] font-display font-semibold" style={{ color: selected ? "var(--text-primary)" : "var(--text-muted)" }}>{t.label}</span>
+              </button>
+            </Tooltip>
+          );
+        })}
       </div>
     </div>
   );
