@@ -483,6 +483,13 @@
   .assistant-panel-box{ border-radius:14px !important; }
   .avatar{ border-radius:9999px; }
 
+  /* ===== Cards are rectangular, not pills =====
+     Every card/panel/modal in the app shares the .glass surface class, so
+     this one rule flips all of them to sharp corners in one place — buttons,
+     badges, tabs, and avatars (none of which use .glass) are untouched and
+     keep the pill design above. */
+  .glass[class*="rounded-"]{ border-radius:0 !important; }
+
   /* ===== Typography: extreme weight contrast instead of color changes ===== */
   .font-display{ font-weight:700 !important; letter-spacing:-0.005em; }
   body{ font-weight:400; }
