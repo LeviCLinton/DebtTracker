@@ -207,41 +207,55 @@
     --header-bg:rgba(248,250,252,0.85);
   }
   html[data-theme="dark"]{
-    /* ===== Dark mode — same warm gold identity, inverted onto deep charcoal-brown ===== */
-    --bg-base:#1C160C;
-    --bg-vignette:linear-gradient(160deg, #14100A 0%, #1E1710 35%, #241B0D 70%, #2E2410 100%);
-    --surface:#241D12;
-    --surface-raised:#2A2214;
-    --surface-hover:#332A19;
-    --border:#3A2F1C;
-    --border-soft:#2E2617;
-    --text-primary:#F5EEDD;
-    --text-muted:#C2AC80;
-    --text-dim:#8C7C5C;
-    --emerald:#E0AC4E;
-    --emerald-dim:#3A2E13;
-    --azure:#F5EEDD;
-    --azure-dim:#332A19;
-    --amber:#E0AC4E;
-    --amber-dim:#3A2E13;
-    --danger:#E2685A;
-    --danger-dim:#3A1F1A;
-    --violet:#C2AC80;
-    --accent:#E0AC4E;
-    --accent-ink:#211804;
-    --accent-border:#5C4A24;
-    --border-soft-emerald:#E4C57C;
-    --border-soft-azure:#DEDBD2;
-    --glass-bg:rgba(36,29,18,0.7);
-    --glass-border:rgba(224,172,78,0.14);
-    --header-bg:rgba(20,16,10,0.82);
+    /* ===== Ledger Noir — a near-black canvas with graphite hairline borders
+       and a single signature neon-violet accent, in place of a plain gold-
+       on-brown inversion of light mode. Functional meaning is unchanged:
+       emerald still reads as "owed to you" / positive, amber still flags
+       due-soon, and the alarm red still marks overdue debt — only the
+       finish is new. ===== */
+    --bg-base:#07080B;
+    --bg-vignette:linear-gradient(160deg, #0A0B10 0%, #07080B 45%, #050609 100%);
+    --surface:#0C0D12;
+    --surface-raised:#101319;
+    --surface-hover:#171A21;
+    --border:#24262E;
+    --border-soft:#1A1C23;
+    --text-primary:#F1F2F5;
+    --text-muted:#9BA0AA;
+    --text-dim:#5B5F6B;
+    --emerald:#34D399;
+    --emerald-dim:#0F2A21;
+    --azure:#5AB3FF;
+    --azure-dim:#10202E;
+    --amber:#F4B740;
+    --amber-dim:#2A200E;
+    --danger:#FF6B6E;
+    --danger-dim:#2B1417;
+    --violet:#8C7CF6;
+    --accent:#8C7CF6;
+    --accent-ink:#0D0B17;
+    --accent-border:#453C8C;
+    --border-soft-emerald:#1F6E52;
+    --border-soft-azure:#2C5D8C;
+    --glass-bg:rgba(12,13,18,0.72);
+    --glass-border:rgba(140,124,246,0.16);
+    --header-bg:rgba(7,8,11,0.85);
   }
-  html[data-theme="dark"] ::-webkit-scrollbar-thumb{ background:#4A3E28; }
-  html[data-theme="dark"] .slider-track{ background:#332A19; }
-  html[data-theme="dark"] .slider-track::-webkit-slider-thumb{ border-color:#241D12; }
-  html[data-theme="dark"] .pin-dot{ border-color:#4A3E28; }
-  html[data-theme="dark"] .item-card:hover{ border-color:#5C4A24; }
-  html[data-theme="dark"] .auth-orb-2{ background:radial-gradient(circle, #E0AC4E, transparent 70%); }
+  html[data-theme="dark"] ::-webkit-scrollbar-thumb{ background:#2E313B; }
+  html[data-theme="dark"] .slider-track{ background:#1C1E24; }
+  html[data-theme="dark"] .slider-track::-webkit-slider-thumb{ border-color:#0C0D12; }
+  html[data-theme="dark"] .pin-dot{ border-color:#2E313B; }
+  html[data-theme="dark"] .item-card:hover{ border-color:#453C8C; }
+  html[data-theme="dark"] .auth-orb-1{ background:radial-gradient(circle, #6A5CD6, transparent 70%); }
+  html[data-theme="dark"] .auth-orb-2{ background:radial-gradient(circle, #8C7CF6, transparent 70%); }
+  html[data-theme="dark"] .auth-orb-3{ background:radial-gradient(circle, #B3A6FF, transparent 70%); }
+  /* Signature touch: numbers rendered in the app's monospace face pick up a
+     faint violet tint by default in dark mode — an echo of Ledger Violet
+     marking figures the way a signature color marks code elsewhere. Any
+     balance that already carries its own explicit color (debt vs.
+     receivable, positive vs. negative) overrides this via inline style, so
+     the semantic color-coding elsewhere in the app is untouched. */
+  html[data-theme="dark"] .font-mono{ color:#B3A6FF; }
   *{box-sizing:border-box;}
   html,body{background:var(--bg-base);}
   html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
@@ -536,7 +550,7 @@
     if (savedTheme === "dark" || (!savedTheme && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
       document.documentElement.setAttribute("data-theme", "dark");
       var tc = document.querySelector('meta[name="theme-color"]');
-      if (tc) tc.setAttribute("content", "#1C160C");
+      if (tc) tc.setAttribute("content", "#07080B");
     }
   } catch (e) { /* localStorage unavailable — default to light */ }
 </script>
@@ -1496,8 +1510,8 @@ function MotionBackground() {
 
     const tick = () => {
       const dark = isDark();
-      const dotRGB = dark ? "224,172,78" : "184,121,10";   // --accent, theme-matched
-      const lineRGB = dark ? "224,172,78" : "20,18,13";     // --accent / --text-primary
+      const dotRGB = dark ? "140,124,246" : "184,121,10";   // --accent, theme-matched
+      const lineRGB = dark ? "140,124,246" : "20,18,13";     // --accent / --text-primary
       const particles = particlesRef.current;
       const mouse = mouseRef.current;
       ctx.clearRect(0, 0, width, height);
@@ -2029,7 +2043,7 @@ function ThemeToggle() {
       const isDark = document.documentElement.getAttribute("data-theme") === "dark";
       setDark(isDark);
       const tc = document.querySelector('meta[name="theme-color"]');
-      if (tc) tc.setAttribute("content", isDark ? "#1C160C" : "#F8FAFC");
+      if (tc) tc.setAttribute("content", isDark ? "#07080B" : "#F8FAFC");
     };
     window.addEventListener("ledger-theme-change", sync);
     return () => window.removeEventListener("ledger-theme-change", sync);
