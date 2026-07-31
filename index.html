@@ -146,6 +146,22 @@
     window.dispatchEvent(new Event("pwa-installed"));
   });
 </script>
+  <!-- Firebase (compat SDK — works fine with the in-browser Babel setup, no bundler needed) -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+  // Paste the config object Firebase gave you in step 1. This is safe to be
+  // public — it identifies the project, it doesn't grant access on its own.
+  window.__FIREBASE_CONFIG = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID",
+  };
+</script>
 <script>
   // The Tailwind Play CDN and in-browser Babel transformer both print a
   // one-line "don't use this in production" notice on load. That notice is
@@ -1229,6 +1245,90 @@ async function markBackupCompleted() {
   const prevMeta = (await idbGet(IDB_SYNC_META_KEY)) || {};
   await idbSet(IDB_SYNC_META_KEY, { ...prevMeta, lastBackupAt: Date.now() });
 }
+/* ============================= FIREBASE / CLOUD SYNC (opt-in) ============================= */
+// Genuine, disclosed exception to "nothing leaves this device" — same category
+// as the AI assistant and live currency conversion. What's synced is the
+// SAME ciphertext blob already saved locally via saveAuthStore(): wrapped
+// keys + encrypted data. Firebase never sees a PIN, a DEK, or plaintext.
+
+let firebaseApp = null;
+let firebaseAuthInstance = null;
+let firestoreInstance = null;
+
+function initFirebase() {
+  if (firebaseApp) return true;
+  if (!window.firebase || !window.__FIREBASE_CONFIG) return false;
+  try {
+    firebaseApp = window.firebase.initializeApp(window.__FIREBASE_CONFIG);
+    firebaseAuthInstance = window.firebase.auth();
+    firestoreInstance = window.firebase.firestore();
+    return true;
+  } catch (e) {
+    // Already initialized (hot reload / re-render) — reuse existing instances.
+    firebaseAuthInstance = window.firebase.auth();
+    firestoreInstance = window.firebase.firestore();
+    return true;
+  }
+}
+
+function getCloudUser() {
+  if (!initFirebase()) return null;
+  return firebaseAuthInstance.currentUser;
+}
+
+async function cloudSignUp(email, password) {
+  if (!initFirebase()) throw new Error("Firebase isn't configured on this build.");
+  const cred = await firebaseAuthInstance.createUserWithEmailAndPassword(email, password);
+  return cred.user;
+}
+async function cloudSignIn(email, password) {
+  if (!initFirebase()) throw new Error("Firebase isn't configured on this build.");
+  const cred = await firebaseAuthInstance.signInWithEmailAndPassword(email, password);
+  return cred.user;
+}
+async function cloudSignInGoogle() {
+  if (!initFirebase()) throw new Error("Firebase isn't configured on this build.");
+  const provider = new window.firebase.auth.GoogleAuthProvider();
+  const cred = await firebaseAuthInstance.signInWithPopup(provider);
+  return cred.user;
+}
+async function cloudSignOut() {
+  if (!initFirebase()) return;
+  await firebaseAuthInstance.signOut();
+}
+async function cloudResetPassword(email) {
+  if (!initFirebase()) throw new Error("Firebase isn't configured on this build.");
+  await firebaseAuthInstance.sendPasswordResetEmail(email);
+}
+
+// Pushes the whole authStore (wrappedMain, wrappedRecovery, data — all
+// already ciphertext) up as one document, stamped with a server timestamp
+// so a second device can tell whose copy is newer on conflict.
+async function pushAuthStoreToCloud(uid, authStore) {
+  if (!initFirebase()) return;
+  await firestoreInstance.collection("users").doc(uid).set({
+    authStore,
+    updatedAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+  });
+}
+
+async function pullAuthStoreFromCloud(uid) {
+  if (!initFirebase()) return null;
+  const snap = await firestoreInstance.collection("users").doc(uid).get();
+  if (!snap.exists) return null;
+  return snap.data(); // { authStore, updatedAt }
+}
+
+// Debounced push so rapid local edits (typing an amount, dragging the
+// budget slider) don't hammer Firestore with a write per keystroke.
+let _cloudPushTimer = null;
+function queueCloudPush(uid, authStore, delayMs = 2500) {
+  if (!uid) return;
+  clearTimeout(_cloudPushTimer);
+  _cloudPushTimer = setTimeout(() => {
+    pushAuthStoreToCloud(uid, authStore).catch(() => { /* retried on next successful save */ });
+  }, delayMs);
+}  
 
 /* --- Live currency conversion. A second, deliberate exception to "nothing
    leaves this device" (the first being the optional AI assistant): to
