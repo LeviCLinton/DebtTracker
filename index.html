@@ -5536,5 +5536,28 @@ function App() {
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<App />);
 </script>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyCjHDvr-8EyxC3D7Qwh_36OakU8tsqr7yk",
+    authDomain: "debttracker254.firebaseapp.com",
+    projectId: "debttracker254",
+    storageBucket: "debttracker254.firebasestorage.app",
+    messagingSenderId: "864550964229",
+    appId: "1:864550964229:web:ee56bb9af921c4055c206c",
+    measurementId: "G-929G5WZKKR"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>  
 </body>
 </html>
