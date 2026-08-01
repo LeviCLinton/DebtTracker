@@ -5168,7 +5168,7 @@ function BlogPostCard({ post, delay }) {
 
 /* ============================= FAQ ============================= */
 const FAQ_ITEMS = [
-  { q: "Is DebtTracker really free?", a: "Yes. There's no subscription, no paywall, and no ads. The only optional cost is your own Anthropic API key if you choose to connect your own AI for the assistant — and that's entirely opt-in." },
+  { q: "Is DebtTracker really free?", a: "Yes. There's no subscription and no paywall — every feature is available to everyone. The app is supported by ads, and you can also support development directly via the donate option in Settings. The only optional cost is your own Anthropic API key if you choose to connect your own AI for the assistant." },
   { q: "Where is my data stored?", a: "Locally, on your own device, inside your browser's IndexedDB — encrypted with AES-GCM using a key derived from your PIN. There's no account system and no server, so nothing is ever uploaded anywhere by default." },
   { q: "What happens if I forget my PIN?", a: "Use the backup/recovery code you saved during setup to reset it from the login screen. If you've lost both your PIN and your backup code, there's genuinely no way to decrypt your existing data — you can factory reset and start fresh, but the old data can't be recovered." },
   { q: "Does DebtTracker work offline?", a: "Yes. Once installed (or after your first visit, thanks to the service worker), the app keeps working fully offline — the only two features that ever need a connection are live currency conversion and the optional \"connect your own AI\" assistant." },
@@ -5279,9 +5279,9 @@ function SupportPanel({ onClose, stacked = false }) {
         </button>
       </div>
       <p className="text-[12.5px] leading-relaxed mb-4" style={{ color: "var(--text-muted)" }}>
-        DebtTracker is free, with no ads and no subscription. If it's been useful, a small
-        donation helps keep it that way. This opens PayPal's own secure widget — your payment
-        details never pass through DebtTracker itself.
+        DebtTracker is free, with no subscription required. If it's been useful, a small
+        donation helps support development directly. This opens PayPal's own secure widget —
+        your payment details never pass through DebtTracker itself.
       </p>
       <PayPalSupportEmbed />
     </div>
@@ -5295,7 +5295,7 @@ function SupportButton({ stacked = false }) {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Tooltip label="DebtTracker is free with no ads — a small donation via PayPal helps keep it that way" position="top">
+      <Tooltip label="DebtTracker is free to use — a small donation via PayPal helps support development" position="top">
         <button onClick={() => setOpen((o) => !o)}
           className={`fixed ${stacked ? "bottom-24" : "bottom-6"} right-4 sm:right-8 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-lg focus-ring`}
           style={{ background: "var(--danger)", color: "#fff" }} aria-label="Support DebtTracker">
@@ -5317,9 +5317,9 @@ function SupportSettingsCard() {
         <h3 className="font-display font-semibold text-lg">Support DebtTracker</h3>
       </div>
       <p className="text-[13px] text-[var(--text-muted)] leading-relaxed mb-5">
-        DebtTracker is free, with no ads and no subscription. If it's been useful to you, a
-        small donation helps keep it that way. This loads PayPal's own secure widget — your
-        payment details never pass through DebtTracker itself.
+        DebtTracker is free, with no subscription required. If it's been useful to you, a
+        small donation helps support development directly. This loads PayPal's own secure
+        widget — your payment details never pass through DebtTracker itself.
       </p>
       <PayPalSupportEmbed />
     </div>
@@ -5381,7 +5381,7 @@ function LandingPage({ onLaunch }) {
           <div>
             <Reveal>
               <span className="inline-flex items-center gap-2 text-[12px] font-medium px-4 py-1.5 rounded-full mb-6 whitespace-nowrap" style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-muted)" }}>
-                <Icon name="lock" size={12} /> 100% offline · no account · no ads
+                <Icon name="lock" size={12} /> 100% offline · no account required
               </span>
             </Reveal>
             <Reveal delay={80}>
@@ -5434,8 +5434,8 @@ function LandingPage({ onLaunch }) {
             </p>
             <p className="text-[15px] leading-relaxed" style={{ color: "var(--text-muted)", fontWeight: 300 }}>
               It runs entirely as a self-contained app on your own device — no company
-              database, no account to create, no ads to fund it. Just your numbers, a
-              payoff plan built from them, and a PIN only you know.
+              database, no account to create. Just your numbers, a payoff plan built
+              from them, and a PIN only you know.
             </p>
           </Reveal>
           <div className="space-y-5">
@@ -5594,7 +5594,7 @@ function LandingPage({ onLaunch }) {
       <footer className="px-5 sm:px-8 py-10 border-t" style={{ borderColor: "var(--border-soft)" }}>
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-[12px]" style={{ color: "var(--text-dim)" }}>
           <span>© {new Date().getFullYear()} DebtTracker. Runs entirely on your device.</span>
-          <span>No accounts. No ads. No tracking.</span>
+          <span>No accounts. No tracking.</span>
           <a href="mailto:leviclinton2020@gmail.com" className="inline-flex items-center gap-1.5 hover:opacity-70 transition-opacity" style={{ color: "var(--text-dim)" }}>
             <Icon name="mail" size={13} /> Having an issue? Email support
           </a>
