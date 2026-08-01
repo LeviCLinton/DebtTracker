@@ -146,21 +146,77 @@
     window.dispatchEvent(new Event("pwa-installed"));
   });
 </script>
-  <!-- Firebase (compat SDK — works fine with the in-browser Babel setup, no bundler needed) -->
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script>
-  // Paste the config object Firebase gave you in step 1. This is safe to be
-  // public — it identifies the project, it doesn't grant access on its own.
-  window.__FIREBASE_CONFIG = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID",
-  };
+  // Live cursor interaction for every card on the page. A single delegated
+  // listener (rather than one per card) finds whichever .glass card is
+  // currently under the pointer and writes tilt/glare custom properties
+  // straight onto that element — no React state, no re-renders, so this
+  // stays smooth no matter how many cards are mounted. Modals, the chat
+  // window, and small toggle bars opt out in CSS via .modal-panel /
+  // .assistant-panel-box / .no-tilt, so this only ever touches genuine
+  // display cards.
+  (function () {
+    var activeCard = null;
+    var rafPending = false;
+    var lastX = 0, lastY = 0;
+
+    function isExcluded(el) {
+      return el.classList.contains("modal-panel") ||
+             el.classList.contains("assistant-panel-box") ||
+             el.classList.contains("no-tilt");
+    }
+
+    function resetCard(el) {
+      if (!el) return;
+      el.style.setProperty("--tilt-rx", "0deg");
+      el.style.setProperty("--tilt-ry", "0deg");
+      el.style.setProperty("--glare-x", "50%");
+      el.style.setProperty("--glare-y", "50%");
+    }
+
+    function applyTilt(el, x, y) {
+      var rect = el.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      var px = (x - rect.left) / rect.width;
+      var py = (y - rect.top) / rect.height;
+      var rx = (0.5 - py) * 6;
+      var ry = (px - 0.5) * 6;
+      el.style.setProperty("--tilt-rx", rx.toFixed(2) + "deg");
+      el.style.setProperty("--tilt-ry", ry.toFixed(2) + "deg");
+      el.style.setProperty("--glare-x", (px * 100).toFixed(1) + "%");
+      el.style.setProperty("--glare-y", (py * 100).toFixed(1) + "%");
+    }
+
+    function onFrame() {
+      rafPending = false;
+      var target = document.elementFromPoint(lastX, lastY);
+      var card = target && target.closest ? target.closest(".glass") : null;
+      if (card && isExcluded(card)) card = null;
+      if (card !== activeCard) {
+        resetCard(activeCard);
+        activeCard = card;
+      }
+      if (activeCard) applyTilt(activeCard, lastX, lastY);
+    }
+
+    function handleMove(e) {
+      lastX = e.clientX;
+      lastY = e.clientY;
+      if (rafPending) return;
+      rafPending = true;
+      requestAnimationFrame(onFrame);
+    }
+
+    function handleWindowLeave() {
+      resetCard(activeCard);
+      activeCard = null;
+    }
+
+    // Touch devices don't hover, so this simply never activates there —
+    // cards just behave like plain, static cards, which is the right call.
+    document.addEventListener("mousemove", handleMove, { passive: true });
+    document.addEventListener("mouseleave", handleWindowLeave);
+  })();
 </script>
 <script>
   // The Tailwind Play CDN and in-browser Babel transformer both print a
@@ -188,6 +244,26 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://www.paypal.com/sdk/js?client-id=BAA1oREI3KoT-Px6c70Ht9fb3_4EDbMbfO9sKakle9vdPQaIcJVIRbzVW4ASAyHlLxyWMC2sfFHvXXRQtw&components=hosted-buttons&disable-funding=venmo&currency=USD" defer></script>
+<!-- Firebase (compat SDK — works fine with the in-browser Babel setup, no bundler needed) -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+  // Paste the config object Firebase gave you when you registered the web
+  // app (Firebase console → Project settings → Your apps). This is safe to
+  // be public — it identifies the project, it doesn't grant access on its
+  // own; Firestore's security rules (see the setup doc) do the actual
+  // access control. Cloud Sync in Settings simply won't activate until
+  // these are filled in with your real project's values.
+  window.__FIREBASE_CONFIG = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID",
+  };
+</script>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -527,6 +603,33 @@
     backdrop-filter:blur(16px) saturate(140%);
     -webkit-backdrop-filter:blur(16px) saturate(140%);
     border:1px solid var(--glass-border);
+  }
+
+  /* ===== Live cursor interaction for every card =====
+     A single global listener (see the plain <script> near the top of
+     <body>) tracks the pointer and writes --tilt-rx/--tilt-ry/--glare-x/
+     --glare-y directly onto whichever card is currently hovered — no React
+     re-renders involved, so it stays smooth regardless of how many cards
+     are on screen. Modals, the assistant chat window, and small toggle
+     bars opt out via .modal-panel / .assistant-panel-box / .no-tilt, since
+     tilting a dialog you're actively typing into isn't a good idea. */
+  .glass:not(.modal-panel):not(.assistant-panel-box):not(.no-tilt){
+    position:relative;
+    transition: transform 0.12s ease-out, border-color 0.18s ease, box-shadow 0.18s ease;
+    will-change: transform;
+    transform: perspective(800px) rotateX(var(--tilt-rx, 0deg)) rotateY(var(--tilt-ry, 0deg));
+  }
+  .glass:not(.modal-panel):not(.assistant-panel-box):not(.no-tilt)::before{
+    content:"";
+    position:absolute; inset:0;
+    background:radial-gradient(circle at var(--glare-x,50%) var(--glare-y,50%), rgba(255,255,255,0.08), transparent 55%);
+    opacity:0; transition:opacity 0.2s ease;
+    pointer-events:none;
+    z-index:1;
+  }
+  .glass:not(.modal-panel):not(.assistant-panel-box):not(.no-tilt):hover::before{ opacity:1; }
+  @media (prefers-reduced-motion: reduce){
+    .glass:not(.modal-panel):not(.assistant-panel-box):not(.no-tilt){ transform:none !important; transition:none !important; }
   }
 
   .num-input::-webkit-outer-spin-button,
@@ -1030,6 +1133,48 @@ async function unwrapDEK(wrapperKey, ivB64, cipherB64) {
   return crypto.subtle.importKey("raw", raw, { name: "AES-GCM" }, true, ["encrypt", "decrypt"]);
 }
 
+/* --- Credential rate limiting: progressive lockout on repeated failed PIN,
+   recovery-code, or 2FA attempts. Persisted to localStorage (not the
+   encrypted store, since it must work before anything is decrypted) so it
+   survives a page refresh — someone brute-forcing a PIN can't just reload
+   to reset the clock. Each guard (unlock PIN, recovery code, 2FA, change-PIN)
+   tracks its own independent counter via its own key. --- */
+const RATE_LIMIT_SCHEDULE = [0, 0, 0, 30, 60, 120, 300, 900]; // seconds locked out, indexed by failure count
+function rateLimitStorageKey(key) { return `ledger_ratelimit_${key}`; }
+function getRateLimitState(key) {
+  try {
+    const raw = localStorage.getItem(rateLimitStorageKey(key));
+    return raw ? JSON.parse(raw) : { failCount: 0, lockedUntil: 0 };
+  } catch (e) { return { failCount: 0, lockedUntil: 0 }; }
+}
+function setRateLimitState(key, state) {
+  try { localStorage.setItem(rateLimitStorageKey(key), JSON.stringify(state)); } catch (e) { /* ignore */ }
+}
+function checkRateLimit(key) {
+  const state = getRateLimitState(key);
+  const now = Date.now();
+  if (state.lockedUntil && now < state.lockedUntil) {
+    return { allowed: false, retryInSeconds: Math.ceil((state.lockedUntil - now) / 1000), failCount: state.failCount };
+  }
+  return { allowed: true, failCount: state.failCount };
+}
+function recordRateLimitFailure(key) {
+  const state = getRateLimitState(key);
+  const now = Date.now();
+  const failCount = state.failCount + 1;
+  const idx = Math.min(failCount, RATE_LIMIT_SCHEDULE.length - 1);
+  const lockSeconds = RATE_LIMIT_SCHEDULE[idx];
+  const lockedUntil = lockSeconds > 0 ? now + lockSeconds * 1000 : 0;
+  setRateLimitState(key, { failCount, lockedUntil });
+  return { failCount, lockedUntil, lockSeconds };
+}
+function clearRateLimit(key) { setRateLimitState(key, { failCount: 0, lockedUntil: 0 }); }
+function formatLockoutDuration(seconds) {
+  if (seconds < 60) return `${seconds}s`;
+  const mins = Math.ceil(seconds / 60);
+  return `${mins} minute${mins === 1 ? "" : "s"}`;
+}
+
 /* --- Recovery code: a locally-generated backup key. Since this app has no
    server, it can't email a reset link — this code is the honest client-side
    equivalent of "forgot password". --- */
@@ -1245,6 +1390,7 @@ async function markBackupCompleted() {
   const prevMeta = (await idbGet(IDB_SYNC_META_KEY)) || {};
   await idbSet(IDB_SYNC_META_KEY, { ...prevMeta, lastBackupAt: Date.now() });
 }
+
 /* ============================= FIREBASE / CLOUD SYNC (opt-in) ============================= */
 // Genuine, disclosed exception to "nothing leaves this device" — same category
 // as the AI assistant and live currency conversion. What's synced is the
@@ -1328,7 +1474,7 @@ function queueCloudPush(uid, authStore, delayMs = 2500) {
   _cloudPushTimer = setTimeout(() => {
     pushAuthStoreToCloud(uid, authStore).catch(() => { /* retried on next successful save */ });
   }, delayMs);
-}  
+}
 
 /* --- Live currency conversion. A second, deliberate exception to "nothing
    leaves this device" (the first being the optional AI assistant): to
@@ -1729,6 +1875,31 @@ function answerAssistantLocally(query, ctx) {
 
 const ASSISTANT_FALLBACK = "I'm not sure how to answer that one locally — I can only pattern-match specific questions about your balances, payoff plan, and how to use DebtTracker (try \"help\" for examples). For open-ended conversation, you can connect your own AI key in the assistant settings.";
 
+/* --- Message rate limiting for the "connect your own AI" tier only. The
+   local assistant costs nothing and never needs this. This exists purely
+   to protect the person's own wallet — capping how many real API calls a
+   bug, an open tab, or an accidental loop could rack up against their own
+   Anthropic key — not as a security boundary. A sliding one-hour window,
+   persisted to localStorage so it isn't reset by a page refresh. --- */
+const ASSISTANT_RATE_LIMIT = 30; // messages per rolling hour
+const ASSISTANT_RATE_WINDOW_MS = 60 * 60 * 1000;
+function checkAssistantRateLimit() {
+  try {
+    const raw = localStorage.getItem("ledger_assistant_sends");
+    const timestamps = raw ? JSON.parse(raw) : [];
+    const now = Date.now();
+    const recent = timestamps.filter((t) => now - t < ASSISTANT_RATE_WINDOW_MS);
+    if (recent.length >= ASSISTANT_RATE_LIMIT) {
+      const retryInSeconds = Math.ceil((ASSISTANT_RATE_WINDOW_MS - (now - Math.min(...recent))) / 1000);
+      return { allowed: false, retryInSeconds, recent };
+    }
+    return { allowed: true, recent };
+  } catch (e) { return { allowed: true, recent: [] }; }
+}
+function recordAssistantSend(recent) {
+  try { localStorage.setItem("ledger_assistant_sends", JSON.stringify([...recent, Date.now()])); } catch (e) { /* ignore */ }
+}
+
 async function callAnthropicAPI(apiKey, model, history, systemPrompt) {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -1790,7 +1961,7 @@ function MotionBackground() {
     // Kept deliberately sparse and low-opacity — this is a minimalist, premium
     // app, so the motion should read as "alive" in peripheral vision, not as
     // a decorative centerpiece competing with real content.
-    const countFor = (w, h) => Math.max(14, Math.min(38, Math.round((w * h) / 42000)));
+    const countFor = (w, h) => Math.max(24, Math.min(70, Math.round((w * h) / 26000)));
 
     const makeParticle = () => ({
       x: Math.random() * width,
@@ -1823,8 +1994,8 @@ function MotionBackground() {
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseleave", onMouseLeave);
 
-    const LINK_DIST = 130;
-    const MOUSE_RADIUS = 140;
+    const LINK_DIST = 150;
+    const MOUSE_RADIUS = 160;
 
     const tick = () => {
       const dark = isDark();
@@ -1856,7 +2027,7 @@ function MotionBackground() {
           const dx = a.x - b.x, dy = a.y - b.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < LINK_DIST) {
-            const alpha = 0.05 * (1 - dist / LINK_DIST);
+            const alpha = 0.08 * (1 - dist / LINK_DIST);
             ctx.strokeStyle = `rgba(${lineRGB},${alpha.toFixed(3)})`;
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
@@ -1866,12 +2037,15 @@ function MotionBackground() {
         }
       }
 
+      ctx.shadowBlur = 5;
+      ctx.shadowColor = `rgba(${dotRGB},0.55)`;
       for (const p of particles) {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${dotRGB},0.26)`;
+        ctx.fillStyle = `rgba(${dotRGB},0.34)`;
         ctx.fill();
       }
+      ctx.shadowBlur = 0;
 
       rafRef.current = requestAnimationFrame(tick);
     };
@@ -1903,18 +2077,18 @@ function DashboardBackground() {
   return <MotionBackground />;
 }
 
-function PinPad({ onDigit, onBack }) {
+function PinPad({ onDigit, onBack, disabled }) {
   const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "back"];
   return (
-    <div className="grid grid-cols-3 gap-3 w-full max-w-[280px] mx-auto">
+    <div className={`grid grid-cols-3 gap-3 w-full max-w-[280px] mx-auto ${disabled ? "opacity-40 pointer-events-none" : ""}`}>
       {keys.map((k, i) =>
         k === "" ? (<div key={i}></div>) :
         k === "back" ? (
-          <button key={i} onClick={onBack} className="keypad-btn h-16 rounded-2xl flex items-center justify-center text-slate-300 hover:bg-[var(--surface-hover)] focus-ring" aria-label="Backspace">
+          <button key={i} onClick={onBack} disabled={disabled} className="keypad-btn h-16 rounded-2xl flex items-center justify-center text-slate-300 hover:bg-[var(--surface-hover)] focus-ring" aria-label="Backspace">
             <Icon name="delete" size={20} />
           </button>
         ) : (
-          <button key={i} onClick={() => onDigit(k)} className="keypad-btn h-16 rounded-2xl text-2xl font-display font-semibold bg-[var(--surface)] border border-[var(--border-soft)] hover:bg-[var(--surface-hover)] focus-ring">
+          <button key={i} onClick={() => onDigit(k)} disabled={disabled} className="keypad-btn h-16 rounded-2xl text-2xl font-display font-semibold bg-[var(--surface)] border border-[var(--border-soft)] hover:bg-[var(--surface-hover)] focus-ring">
             {k}
           </button>
         )
@@ -1927,18 +2101,25 @@ function PinPad({ onDigit, onBack }) {
    how they want to unlock the app going forward. --- */
 /* --- Generic credential screen: reused for PIN entry, password entry,
    confirming, unlocking, and recovery-code entry. --- */
-function CredentialScreen({ mode, title, subtitle, icon = "lock", onSubmit, error, submitLabel, showForgot, onForgot, showDisclaimer }) {
+function CredentialScreen({ mode, title, subtitle, icon = "lock", onSubmit, error, submitLabel, showForgot, onForgot, showDisclaimer, rateLimitKey }) {
   const [value, setValue] = useState("");
   const [shake, setShake] = useState(false);
+  const rl = useRateLimit(rateLimitKey);
+  const locked = !!rateLimitKey && !rl.allowed;
 
   useEffect(() => { setValue(""); }, [mode]);
   useEffect(() => {
-    if (error) { setShake(true); const t = setTimeout(() => setShake(false), 500); return () => clearTimeout(t); }
+    if (error) {
+      setShake(true);
+      if (rateLimitKey) rl.fail();
+      const t = setTimeout(() => setShake(false), 500);
+      return () => clearTimeout(t);
+    }
   }, [error]);
 
-  const handleDigit = (d) => { if (value.length < 6) setValue(value + d); };
-  const handleBack = () => setValue((v) => v.slice(0, -1));
-  const canSubmit = mode === "pin" ? value.length >= 4 : value.replace(/[^A-Z0-9]/gi, "").length >= 8;
+  const handleDigit = (d) => { if (!locked && value.length < 6) setValue(value + d); };
+  const handleBack = () => { if (!locked) setValue((v) => v.slice(0, -1)); };
+  const canSubmit = !locked && (mode === "pin" ? value.length >= 4 : value.replace(/[^A-Z0-9]/gi, "").length >= 8);
   const submit = () => { if (canSubmit) onSubmit(mode === "recovery" ? normalizeRecoveryInput(value) : value); };
 
   return (
@@ -1953,6 +2134,14 @@ function CredentialScreen({ mode, title, subtitle, icon = "lock", onSubmit, erro
         </div>
 
         <div className={`glass rounded-3xl p-6 sm:p-8 ${shake ? "anim-shake" : ""}`}>
+          {locked && (
+            <div className="flex items-start gap-2.5 mb-6 px-4 py-3 rounded-2xl" style={{ background: "var(--danger-dim)", border: "1px solid var(--danger)" }}>
+              <Icon name="triangle-alert" size={16} className="text-[var(--danger)] shrink-0 mt-0.5" />
+              <p className="text-[12.5px] leading-relaxed" style={{ color: "var(--danger)" }}>
+                Too many attempts. Try again in <span className="font-semibold">{formatLockoutDuration(rl.retryInSeconds)}</span>.
+              </p>
+            </div>
+          )}
           {mode === "pin" ? (
             <>
               <div className="flex items-center justify-center gap-3 mb-8 h-4">
@@ -1960,8 +2149,8 @@ function CredentialScreen({ mode, title, subtitle, icon = "lock", onSubmit, erro
                   <div key={i} className={`pin-dot ${i < value.length ? "filled" : ""}`}></div>
                 ))}
               </div>
-              {error && <p className="text-[var(--danger)] text-xs text-center -mt-5 mb-5 font-medium">{error}</p>}
-              <PinPad onDigit={handleDigit} onBack={handleBack} />
+              {!locked && error && <p className="text-[var(--danger)] text-xs text-center -mt-5 mb-5 font-medium">{error}</p>}
+              <PinPad onDigit={handleDigit} onBack={handleBack} disabled={locked} />
             </>
           ) : (
             <>
@@ -1970,20 +2159,21 @@ function CredentialScreen({ mode, title, subtitle, icon = "lock", onSubmit, erro
                   autoFocus
                   type="text"
                   value={value}
+                  disabled={locked}
                   onChange={(e) => setValue(e.target.value.toUpperCase())}
                   onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
                   placeholder="XXXX-XXXX-XXXX"
-                  className="w-full bg-[var(--surface)] border border-[var(--border-soft)] rounded-xl px-4 py-3.5 font-mono tracking-widest text-center text-sm focus-ring focus:border-[var(--emerald)]"
+                  className="w-full bg-[var(--surface)] border border-[var(--border-soft)] rounded-xl px-4 py-3.5 font-mono tracking-widest text-center text-sm focus-ring focus:border-[var(--emerald)] disabled:opacity-50"
                 />
               </div>
-              {error && <p className="text-[var(--danger)] text-xs text-center mb-3 font-medium">{error}</p>}
+              {!locked && error && <p className="text-[var(--danger)] text-xs text-center mb-3 font-medium">{error}</p>}
             </>
           )}
 
           <RippleButton onClick={submit} disabled={!canSubmit}
             className="w-full mt-6 h-12 rounded-2xl font-display font-semibold text-[15px] transition-all focus-ring disabled:opacity-30 disabled:cursor-not-allowed"
             style={{ background: canSubmit ? "var(--emerald)" : "var(--surface)", color: canSubmit ? "var(--accent-ink)" : "var(--text-dim)" }}>
-            {submitLabel}
+            {locked ? "Locked" : submitLabel}
           </RippleButton>
 
           {showForgot && (
@@ -2106,6 +2296,31 @@ function FactoryResetModal({ onClose, onConfirm }) {
   );
 }
 
+/* --- Shown when both this device and a signed-in cloud account already
+   have data that has since diverged (e.g. this device was used offline
+   for a while). Rather than silently picking one, the person chooses. --- */
+function CloudConflictModal({ conflict, onKeepLocal, onUseCloud }) {
+  const remoteDate = conflict.remoteUpdatedAt?.toDate?.() ? conflict.remoteUpdatedAt.toDate().toLocaleString() : "recently";
+  return (
+    <div className="fixed inset-0 z-[95] flex items-center justify-center modal-backdrop p-4" style={{ background: "rgba(4,6,10,0.8)" }}>
+      <div className="modal-panel glass w-full sm:max-w-sm sm:rounded-3xl p-6 sm:p-7" style={{ borderRadius: "24px" }}>
+        <h2 className="font-display text-lg font-semibold mb-2">Two versions found</h2>
+        <p className="text-[13px] text-[var(--text-muted)] leading-relaxed mb-5">
+          This device has local data, and your account also has a synced backup from {remoteDate}. Which should be kept? The other will be overwritten.
+        </p>
+        <div className="flex flex-col gap-2">
+          <button onClick={onUseCloud} className="h-11 rounded-xl text-sm font-display font-semibold" style={{ background: "var(--emerald)", color: "var(--accent-ink)" }}>
+            Use the cloud version
+          </button>
+          <button onClick={onKeepLocal} className="h-11 rounded-xl text-sm font-display font-semibold border border-[var(--border-soft)]">
+            Keep this device's version
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TwoFAOfferScreen({ onEnable, onSkip }) {
   return (
     <div className="min-h-screen flex items-center justify-center px-5 py-10 relative z-10">
@@ -2173,8 +2388,10 @@ function TwoFASetupScreen({ secret, otpauthUrl, onVerify, onSkip, error }) {
 function TwoFAVerifyScreen({ onVerify, error }) {
   const [code, setCode] = useState("");
   const [shake, setShake] = useState(false);
+  const rl = useRateLimit("unlock-2fa");
+  const locked = !rl.allowed;
   useEffect(() => {
-    if (error) { setShake(true); const t = setTimeout(() => setShake(false), 500); return () => clearTimeout(t); }
+    if (error) { setShake(true); rl.fail(); const t = setTimeout(() => setShake(false), 500); return () => clearTimeout(t); }
   }, [error]);
   return (
     <div className="min-h-screen flex items-center justify-center px-5 py-10 relative z-10">
@@ -2187,14 +2404,22 @@ function TwoFAVerifyScreen({ onVerify, error }) {
           <p className="text-[var(--text-muted)] text-sm text-center mt-2 max-w-[280px]">Enter the 6-digit code from your authenticator app.</p>
         </div>
         <div className={`glass rounded-3xl p-5 sm:p-7 ${shake ? "anim-shake" : ""}`}>
-          <input autoFocus value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-            onKeyDown={(e) => { if (e.key === "Enter" && code.length === 6) onVerify(code); }}
-            className="w-full text-center tracking-[0.4em] font-mono text-lg bg-[var(--surface)] border border-[var(--border-soft)] rounded-xl py-3 focus-ring focus:border-[var(--emerald)] mb-2" placeholder="000000" />
-          {error && <p className="text-[var(--danger)] text-xs text-center mb-3 font-medium">{error}</p>}
-          <button onClick={() => onVerify(code)} disabled={code.length !== 6}
+          {locked && (
+            <div className="flex items-start gap-2.5 mb-5 px-4 py-3 rounded-2xl" style={{ background: "var(--danger-dim)", border: "1px solid var(--danger)" }}>
+              <Icon name="triangle-alert" size={16} className="text-[var(--danger)] shrink-0 mt-0.5" />
+              <p className="text-[12.5px] leading-relaxed" style={{ color: "var(--danger)" }}>
+                Too many attempts. Try again in <span className="font-semibold">{formatLockoutDuration(rl.retryInSeconds)}</span>.
+              </p>
+            </div>
+          )}
+          <input autoFocus value={code} disabled={locked} onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            onKeyDown={(e) => { if (e.key === "Enter" && code.length === 6 && !locked) onVerify(code); }}
+            className="w-full text-center tracking-[0.4em] font-mono text-lg bg-[var(--surface)] border border-[var(--border-soft)] rounded-xl py-3 focus-ring focus:border-[var(--emerald)] mb-2 disabled:opacity-50" placeholder="000000" />
+          {!locked && error && <p className="text-[var(--danger)] text-xs text-center mb-3 font-medium">{error}</p>}
+          <button onClick={() => onVerify(code)} disabled={code.length !== 6 || locked}
             className="w-full h-12 rounded-2xl font-display font-semibold text-[15px] disabled:opacity-30 focus-ring mt-2 transition-all"
-            style={{ background: code.length === 6 ? "var(--emerald)" : "var(--surface)", color: code.length === 6 ? "var(--accent-ink)" : "var(--text-dim)" }}>
-            Verify
+            style={{ background: code.length === 6 && !locked ? "var(--emerald)" : "var(--surface)", color: code.length === 6 && !locked ? "var(--accent-ink)" : "var(--text-dim)" }}>
+            {locked ? "Locked" : "Verify"}
           </button>
         </div>
       </div>
@@ -2239,6 +2464,23 @@ function ForgotExplainScreen({ onHaveCode, onBackToLogin, onFactoryReset }) {
 }
 
 /* ============================= SHARED UI BITS ============================= */
+/* --- Wraps the plain rate-limit helpers above in React state: exposes the
+   live countdown text a screen needs to disable its inputs and show
+   "try again in Xs", ticking once a second while locked. --- */
+function useRateLimit(key) {
+  const [state, setState] = useState(() => checkRateLimit(key));
+  useEffect(() => {
+    if (state.allowed) return;
+    const tick = () => setState(checkRateLimit(key));
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [state.allowed, key]);
+  const fail = () => { recordRateLimitFailure(key); setState(checkRateLimit(key)); };
+  const clear = () => { clearRateLimit(key); setState({ allowed: true, failCount: 0 }); };
+  const refresh = () => setState(checkRateLimit(key));
+  return { ...state, fail, clear, refresh };
+}
+
 function useCountUp(value, duration = 650) {
   const [display, setDisplay] = useState(value);
   const prevRef = useRef(value);
@@ -2696,7 +2938,7 @@ function TransactionModal({ item, onClose, onApply }) {
           <h2 className="font-display text-lg font-semibold">{verb}</h2>
           <button onClick={onClose} className="icon-btn w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--surface-hover)] focus-ring"><Icon name="x" size={17} /></button>
         </div>
-        <div className="glass rounded-2xl p-1 grid grid-cols-2 mb-5">
+        <div className="glass no-tilt rounded-2xl p-1 grid grid-cols-2 mb-5">
           <button onClick={() => setKind("payment")} className={`py-2.5 rounded-xl text-sm font-medium font-display transition-all ${kind === "payment" ? "" : "text-[var(--text-muted)]"}`}
             style={{ background: kind === "payment" ? "var(--emerald-dim)" : "transparent", color: kind === "payment" ? "var(--emerald)" : undefined, border: kind === "payment" ? "1px solid var(--border-soft-emerald)" : "1px solid transparent" }}>
             <Icon name="minus-circle" size={14} className="inline mr-1.5 -mt-0.5" />{item.type === "debt" ? "Payment" : "Received"}
@@ -2813,7 +3055,7 @@ function ItemModal({ initial, defaultType, onClose, onSave, onDelete, onSettle, 
           <button onClick={onClose} className="icon-btn w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--surface-hover)] focus-ring"><Icon name="x" size={18} /></button>
         </div>
 
-        <div className="glass rounded-2xl p-1 grid grid-cols-2 mb-5">
+        <div className="glass no-tilt rounded-2xl p-1 grid grid-cols-2 mb-5">
           <button onClick={() => setType("debt")} className="py-2.5 rounded-xl text-sm font-medium font-display transition-all"
             style={{ background: type === "debt" ? "var(--emerald-dim)" : "transparent", color: type === "debt" ? "var(--emerald)" : "var(--text-muted)", border: type === "debt" ? "1px solid var(--border-soft-emerald)" : "1px solid transparent" }}>
             <Icon name="trending-down" size={14} className="inline mr-1.5 -mt-0.5" /> I owe this
@@ -2951,7 +3193,7 @@ function ItemModal({ initial, defaultType, onClose, onSave, onDelete, onSettle, 
 /* ============================= STRATEGY TOGGLE & BUDGET ============================= */
 function StrategyToggle({ strategy, setStrategy }) {
   return (
-    <div className="glass rounded-3xl p-2 relative">
+    <div className="glass no-tilt rounded-3xl p-2 relative">
       <div className="grid grid-cols-2 relative">
         <div className="absolute top-0 bottom-0 w-1/2 rounded-2xl transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
           style={{
@@ -3592,6 +3834,12 @@ function AssistantPanel({ data, saveData, sim, onClose }) {
       return;
     }
 
+    const rateCheck = checkAssistantRateLimit();
+    if (!rateCheck.allowed) {
+      setMessages((m) => [...m, { role: "assistant", text: `You've hit the limit of ${ASSISTANT_RATE_LIMIT} messages per hour for your connected AI key — this just protects your own API spend. Try again in ${formatLockoutDuration(rateCheck.retryInSeconds)}, or ask the local assistant by disconnecting your key in Settings.` }]);
+      return;
+    }
+
     setBusy(true);
     const summary = assistant.shareData
       ? `The user's DebtTracker snapshot — total debt: ${fmtMoney(ctx.totalDebt)} across ${ctx.activeDebts.length} debts; total owed to them: ${fmtMoney(ctx.totalReceivable)}; net position: ${fmtMoney(ctx.totalReceivable - ctx.totalDebt)}; strategy: ${ctx.strategy}; projected debt-free: ${monthsFromNowLabel(ctx.sim.months)}. Use this only if relevant.`
@@ -3599,6 +3847,7 @@ function AssistantPanel({ data, saveData, sim, onClose }) {
     const systemPrompt = `You are a concise, friendly assistant embedded inside DebtTracker, a personal debt and receivables tracking app. ${summary}`;
     try {
       const reply = await callAnthropicAPI(assistant.apiKey, assistant.model, nextMessages, systemPrompt);
+      recordAssistantSend(rateCheck.recent);
       setMessages((m) => [...m, { role: "assistant", text: reply }]);
     } catch (e) {
       const isNetworkFailure = !navigator.onLine || /failed to fetch|networkerror|load failed/i.test(e.message || "");
@@ -3702,7 +3951,7 @@ function AssistantLauncher({ data, saveData, sim }) {
   );
 }
 
-function SettingsView({ data, saveData, onChangeCredential, onFactoryReset }) {
+function SettingsView({ data, saveData, onChangeCredential, onFactoryReset, cloudUser, cloudSyncStatus, onCloudSignedIn }) {
   const [name, setName] = useState(data.profile?.name || "");
   const [savedPulse, setSavedPulse] = useState(false);
   const [showChangeModal, setShowChangeModal] = useState(false);
@@ -3899,6 +4148,8 @@ function SettingsView({ data, saveData, onChangeCredential, onFactoryReset }) {
 
       <BackgroundRemindersSection />
 
+      <CloudSyncSection cloudUser={cloudUser} cloudSyncStatus={cloudSyncStatus} onSignedIn={onCloudSignedIn} />
+
       <BYOSSection data={data} saveData={saveData} />
 
       <SupportSettingsCard />
@@ -4018,6 +4269,88 @@ function BackgroundRemindersSection() {
         </button>
       </div>
       {status && <p className="text-[11px] text-[var(--text-dim)] mt-3">{status}</p>}
+    </div>
+  );
+}
+
+/* ============================= CLOUD SYNC (opt-in) ============================= */
+function CloudSyncSection({ cloudUser, cloudSyncStatus, onSignedIn }) {
+  const [mode, setMode] = useState("signin"); // signin | signup
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  const submit = async () => {
+    setBusy(true); setError("");
+    try {
+      const user = mode === "signup" ? await cloudSignUp(email, password) : await cloudSignIn(email, password);
+      await onSignedIn(user);
+    } catch (e) {
+      setError(e.message || "Something went wrong.");
+    }
+    setBusy(false);
+  };
+
+  const signInGoogle = async () => {
+    setBusy(true); setError("");
+    try {
+      const user = await cloudSignInGoogle();
+      await onSignedIn(user);
+    } catch (e) {
+      setError(e.message || "Something went wrong.");
+    }
+    setBusy(false);
+  };
+
+  return (
+    <div className="glass rounded-3xl p-5 sm:p-7">
+      <div className="flex items-center gap-2 mb-2">
+        <Icon name="cloud" size={17} className="text-[var(--azure)]" />
+        <h3 className="font-display font-semibold text-lg">Cloud Sync</h3>
+      </div>
+      <p className="text-[13px] text-[var(--text-muted)] leading-relaxed mb-3">
+        Sign in to sync your encrypted vault across devices. This is a real exception to "nothing leaves this device" — but only your already-encrypted data goes up. Your PIN, and the key it unlocks, never leave this browser.
+      </p>
+      <p className="text-[11.5px] leading-relaxed mb-5 px-3 py-2.5 rounded-xl" style={{ background: "var(--amber-dim)", color: "var(--text-muted)" }}>
+        This account is separate from your PIN. Forgetting this password is recoverable (email reset, below). Forgetting your PIN <span style={{ fontWeight: 600 }}>and</span> your recovery code still isn't — cloud sync doesn't change that, since your account never has anything to decrypt your data with.
+      </p>
+
+      {cloudUser ? (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between px-4 py-3.5 rounded-xl bg-[var(--surface)] border border-[var(--border-soft)]">
+            <div>
+              <div className="text-sm font-medium">{cloudUser.email}</div>
+              <div className="text-[11px] text-[var(--text-dim)]">
+                {cloudSyncStatus === "syncing" ? "Syncing…" : cloudSyncStatus === "error" ? "Sync error — will retry" : "Synced"}
+              </div>
+            </div>
+            <button onClick={cloudSignOut} className="h-9 px-3.5 rounded-xl text-[13px] font-display font-semibold" style={{ background: "var(--surface-hover)", border: "1px solid var(--border-soft)" }}>
+              Sign out
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com"
+            className="w-full bg-[var(--surface)] border border-[var(--border-soft)] rounded-xl px-4 py-2.5 text-sm focus-ring" />
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password"
+            className="w-full bg-[var(--surface)] border border-[var(--border-soft)] rounded-xl px-4 py-2.5 text-sm focus-ring" />
+          {error && <p className="text-[12px] text-[var(--danger)]">{error}</p>}
+          <div className="flex gap-2">
+            <button onClick={submit} disabled={busy || !email || !password}
+              className="flex-1 h-10 rounded-xl text-[13px] font-display font-semibold disabled:opacity-50" style={{ background: "var(--emerald)", color: "var(--accent-ink)" }}>
+              {mode === "signup" ? "Create account" : "Sign in"}
+            </button>
+            <button onClick={() => setMode(mode === "signup" ? "signin" : "signup")} className="h-10 px-3 rounded-xl text-[13px] font-display font-semibold border border-[var(--border-soft)]">
+              {mode === "signup" ? "Have an account?" : "New here?"}
+            </button>
+          </div>
+          <button onClick={signInGoogle} disabled={busy} className="w-full h-10 rounded-xl text-[13px] font-display font-semibold border border-[var(--border-soft)]">
+            Continue with Google
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -4333,7 +4666,7 @@ function InstallButton({ variant = "icon" }) {
   );
 }
 
-function Dashboard({ data, saveData, onLock, onChangeCredential, onFactoryReset }) {
+function Dashboard({ data, saveData, onLock, onChangeCredential, onFactoryReset, cloudUser, cloudSyncStatus, onCloudSignedIn }) {
   const { items, extraBudget, strategy } = data;
   // Keep the shared money formatter in sync with this account's chosen currency.
   // Synchronous and before any children render, so every fmtMoney() call below reflects it immediately.
@@ -4577,7 +4910,7 @@ function Dashboard({ data, saveData, onLock, onChangeCredential, onFactoryReset 
         {tab === "contacts" && <ContactsView items={items} onOpenItem={setModalItem} />}
         {tab === "history" && <HistoryView items={items} />}
         {tab === "stats" && <StatisticsView items={items} sim={sim} extraBudget={extraBudget} strategy={strategy} />}
-        {tab === "settings" && <SettingsView data={data} saveData={saveData} onChangeCredential={onChangeCredential} onFactoryReset={onFactoryReset} />}
+        {tab === "settings" && <SettingsView data={data} saveData={saveData} onChangeCredential={onChangeCredential} onFactoryReset={onFactoryReset} cloudUser={cloudUser} cloudSyncStatus={cloudSyncStatus} onCloudSignedIn={onCloudSignedIn} />}
       </main>
 
       {modalItem !== null && (
@@ -5007,9 +5340,11 @@ function LandingPage({ onLaunch }) {
 
   return (
     <div className="min-h-screen relative" style={{ background: "var(--bg-vignette)" }}>
+      <MotionBackground />
       <ThemeToggle />
       <SupportButton />
 
+      <div className="relative z-10">
       {/* Nav */}
       <header className="landing-nav sticky top-0 z-40 border-b" style={{
         background: scrolled ? "var(--header-bg)" : "transparent",
@@ -5265,6 +5600,7 @@ function LandingPage({ onLaunch }) {
           </a>
         </div>
       </footer>
+      </div>
     </div>
   );
 }
@@ -5289,6 +5625,9 @@ function App() {
   const [error, setError] = useState("");
   const [data, setData] = useState(null);
   const [showReset, setShowReset] = useState(false);
+  const [cloudUser, setCloudUser] = useState(null);
+  const [cloudSyncStatus, setCloudSyncStatus] = useState(""); // "", "syncing", "synced", "error"
+  const [cloudConflict, setCloudConflict] = useState(null); // { remoteAuthStore, remoteUpdatedAt } when both local + remote exist and differ
 
   const keyRef = useRef(null);           // the in-memory DEK (Data Encryption Key)
   const storeRef = useRef(null);         // { authMode: "pin", wrappedMain, wrappedRecovery, data }
@@ -5300,6 +5639,12 @@ function App() {
   const forgotDekRef = useRef(null);
   const forgotDataRef = useRef(null);
   const resolvedAuthPhaseRef = useRef("create"); // where "Open App" / "Get Started" on the landing page leads
+
+  useEffect(() => {
+    if (!initFirebase()) return;
+    const unsub = firebaseAuthInstance.onAuthStateChanged((user) => setCloudUser(user));
+    return () => unsub();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -5325,6 +5670,12 @@ function App() {
     const dataBlob = await encryptJSON(keyRef.current, nextData);
     storeRef.current = { ...storeRef.current, data: dataBlob };
     await saveAuthStore(storeRef.current);
+
+    // Mirror the same ciphertext blob to Firestore, debounced. No-op when
+    // not signed in, or when Firebase isn't configured on this build.
+    const cloudUserNow = getCloudUser();
+    if (cloudUserNow) queueCloudPush(cloudUserNow.uid, storeRef.current);
+
     try {
       const dueSoonCount = (nextData.items || []).filter((i) =>
         i.status === "active" && i.dueDate &&
@@ -5338,6 +5689,42 @@ function App() {
   const saveData = useCallback((updater) => {
     setData((prev) => { const next = typeof updater === "function" ? updater(prev) : updater; persist(next); return next; });
   }, [persist]);
+
+  /* ---------- cloud sync: pull on sign-in (new device, or reconciling an existing one) ---------- */
+  const handleCloudSignedIn = useCallback(async (user) => {
+    setCloudSyncStatus("syncing");
+    try {
+      const remote = await pullAuthStoreFromCloud(user.uid);
+      const localStore = await idbGet(IDB_RECORD_KEY);
+
+      if (remote && !localStore) {
+        // Fresh device: adopt the cloud copy wholesale, then let the normal
+        // PIN-unlock flow take over — same PIN as every other device works,
+        // since wrappedMain came down with it.
+        await idbSet(IDB_RECORD_KEY, remote.authStore);
+        window.location.reload();
+        return;
+      }
+      if (remote && localStore) {
+        // Both exist and might have diverged (e.g. this device was used
+        // offline). Let the person choose rather than silently picking one.
+        const localBlob = JSON.stringify(localStore);
+        const remoteBlob = JSON.stringify(remote.authStore);
+        if (localBlob !== remoteBlob) {
+          setCloudConflict({ remoteAuthStore: remote.authStore, remoteUpdatedAt: remote.updatedAt });
+          setCloudSyncStatus("");
+          return;
+        }
+      }
+      if (!remote && localStore) {
+        // First time this account has synced: push what's here now.
+        await pushAuthStoreToCloud(user.uid, localStore);
+      }
+      setCloudSyncStatus("synced");
+    } catch (e) {
+      setCloudSyncStatus("error");
+    }
+  }, []);
 
   /* ---------- first-run setup: set a Master PIN directly ---------- */
   const handleCreateSubmit = (val) => {
@@ -5410,6 +5797,7 @@ function App() {
 
   /* ---------- returning-user login ---------- */
   const handleUnlockSubmit = async (cred) => {
+    if (!checkRateLimit("unlock-pin").allowed) return;
     const store = storeRef.current;
     if (store && store.wrappedMain) {
       try {
@@ -5418,6 +5806,7 @@ function App() {
         const decrypted = migrateData(await decryptJSON(dek, store.data.iv, store.data.cipher));
         keyRef.current = dek;
         setError("");
+        clearRateLimit("unlock-pin");
         if (decrypted.security?.totpEnabled) { pendingDataRef.current = decrypted; setPhase("unlock-twofa"); }
         else { setData(decrypted); setPhase("dashboard"); }
       } catch (e) {
@@ -5447,6 +5836,7 @@ function App() {
       recoveryCodeRef.current = recoveryCode;
       recoveryNoteRef.current = "Your security was just upgraded to support backup codes and two-factor authentication. Save this new backup code — it's the only way back in if you forget your PIN.";
       setError("");
+      clearRateLimit("unlock-pin");
       setPhase("recovery-reveal");
     } catch (e) {
       setError("Incorrect PIN — try again.");
@@ -5454,9 +5844,11 @@ function App() {
   };
 
   const handleUnlockTwoFA = async (code) => {
+    if (!checkRateLimit("unlock-2fa").allowed) return;
     const ok = await verifyTotp(pendingDataRef.current.security.totpSecret, code);
     if (!ok) { setError("That code didn't match — try again."); return; }
     setError("");
+    clearRateLimit("unlock-2fa");
     enterDashboard();
   };
 
@@ -5466,6 +5858,7 @@ function App() {
   const handleForgotBackToLogin = () => { setError(""); setPhase("unlock"); };
 
   const handleForgotCodeSubmit = async (code) => {
+    if (!checkRateLimit("unlock-recovery").allowed) return;
     try {
       const store = storeRef.current;
       const key2 = await deriveKey(code, store.wrappedRecovery.salt);
@@ -5475,6 +5868,7 @@ function App() {
       forgotDataRef.current = decrypted;
       firstCredRef.current = "";
       setError("");
+      clearRateLimit("unlock-recovery");
       setPhase("forgot-create");
     } catch (e) {
       setError("That backup code doesn't match — double-check and try again.");
@@ -5588,7 +5982,7 @@ function App() {
     case "unlock":
       return wrapped(<div key="unlock">
         <CredentialScreen mode="pin" title="Welcome back" subtitle="Enter your PIN to decrypt and unlock your local data."
-          onSubmit={handleUnlockSubmit} error={error} submitLabel="Log In" showForgot onForgot={handleForgotStart} showDisclaimer />
+          onSubmit={handleUnlockSubmit} error={error} submitLabel="Log In" showForgot onForgot={handleForgotStart} showDisclaimer rateLimitKey="unlock-pin" />
         <p className="text-center mt-2">
           <button onClick={() => setShowReset(true)} className="text-[12px] text-[var(--text-dim)] hover:text-[var(--danger)] transition-colors focus-ring">
             Lost your PIN and backup code? Factory reset
@@ -5602,7 +5996,7 @@ function App() {
     case "forgot-code":
       return wrapped(<div key="forgot-code">
         <CredentialScreen mode="recovery" icon="key" title="Enter your backup code" subtitle="The 12-character code you saved when you first set up DebtTracker."
-          onSubmit={handleForgotCodeSubmit} error={error} submitLabel="Continue" />
+          onSubmit={handleForgotCodeSubmit} error={error} submitLabel="Continue" rateLimitKey="unlock-recovery" />
         <p className="text-center mt-2">
           <button onClick={() => setShowReset(true)} className="text-[12px] text-[var(--text-dim)] hover:text-[var(--danger)] transition-colors focus-ring">
             Lost this too? Factory reset instead
@@ -5624,8 +6018,16 @@ function App() {
     case "dashboard":
       if (data) return <>
         <ThemeToggle />
-        <Dashboard data={data} saveData={saveData} onLock={handleLock} onChangeCredential={handleChangeCredential} onFactoryReset={() => setShowReset(true)} />
+        <Dashboard data={data} saveData={saveData} onLock={handleLock} onChangeCredential={handleChangeCredential} onFactoryReset={() => setShowReset(true)}
+          cloudUser={cloudUser} cloudSyncStatus={cloudSyncStatus} onCloudSignedIn={handleCloudSignedIn} />
         {showReset && <FactoryResetModal onClose={() => setShowReset(false)} onConfirm={handleFactoryReset} />}
+        {cloudConflict && (
+          <CloudConflictModal
+            conflict={cloudConflict}
+            onUseCloud={async () => { await idbSet(IDB_RECORD_KEY, cloudConflict.remoteAuthStore); window.location.reload(); }}
+            onKeepLocal={async () => { const user = getCloudUser(); if (user) await pushAuthStoreToCloud(user.uid, storeRef.current); setCloudConflict(null); setCloudSyncStatus("synced"); }}
+          />
+        )}
       </>;
       return null;
     default:
@@ -5636,28 +6038,5 @@ function App() {
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<App />);
 </script>
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyCjHDvr-8EyxC3D7Qwh_36OakU8tsqr7yk",
-    authDomain: "debttracker254.firebaseapp.com",
-    projectId: "debttracker254",
-    storageBucket: "debttracker254.firebasestorage.app",
-    messagingSenderId: "864550964229",
-    appId: "1:864550964229:web:ee56bb9af921c4055c206c",
-    measurementId: "G-929G5WZKKR"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>  
 </body>
 </html>
