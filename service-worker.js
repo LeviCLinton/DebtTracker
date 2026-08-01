@@ -4,7 +4,7 @@
 // without a registered service worker, Chrome/Edge won't consider the page
 // installable at all, and there'd be nothing serving the app when offline.
 
-const CACHE_VERSION = "ledger-v2";
+const CACHE_VERSION = "ledger-v3";
 const APP_SHELL = [
   "./debt-dashboard.html",
   "./debt-dashboard.html?source=pwa",
@@ -17,6 +17,9 @@ const APP_SHELL = [
   "https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js",
   "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js",
   "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js",
+  "https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js",
+  "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js",
+  "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js",
 ];
 
 self.addEventListener("install", (event) => {
