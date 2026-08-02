@@ -1674,7 +1674,7 @@ function toCSV(rows, headers) {
 
 /* ============================= DATA MIGRATION ============================= */
 function migrateData(raw) {
-  if (raw && raw.items) return { security: { totpEnabled: false, totpSecret: null }, profile: { name: "", email: "" }, settings: { currency: "USD" }, assistant: { apiKey: "", model: "claude-sonnet-5", shareData: false }, ...raw };
+  if (raw && raw.items) return { security: { totpEnabled: false, totpSecret: null }, profile: { name: "", email: "" }, settings: { currency: "USD" }, assistant: { apiKey: "", model: "claude-sonnet-5", shareData: false }, chamas: [], ...raw };
   if (raw && raw.debts) {
     const items = raw.debts.map((d) => ({
       id: d.id, type: "debt", name: d.name, contact: "", contactImage: null,
@@ -1682,9 +1682,9 @@ function migrateData(raw) {
       minPayment: d.minPayment || 0, dueDate: "", reminderDays: 3, notes: "",
       status: "active", createdAt: new Date().toISOString(), settledAt: null, history: [],
     }));
-    return { items, extraBudget: raw.extraBudget ?? 200, strategy: raw.strategy || "avalanche", security: { totpEnabled: false, totpSecret: null }, profile: { name: "", email: "" }, settings: { currency: "USD" }, assistant: { apiKey: "", model: "claude-sonnet-5", shareData: false } };
+    return { items, extraBudget: raw.extraBudget ?? 200, strategy: raw.strategy || "avalanche", security: { totpEnabled: false, totpSecret: null }, profile: { name: "", email: "" }, settings: { currency: "USD" }, assistant: { apiKey: "", model: "claude-sonnet-5", shareData: false }, chamas: [] };
   }
-  return { items: [], extraBudget: 200, strategy: "avalanche", security: { totpEnabled: false, totpSecret: null }, profile: { name: "", email: "" }, settings: { currency: "USD" }, assistant: { apiKey: "", model: "claude-sonnet-5", shareData: false } };
+  return { items: [], extraBudget: 200, strategy: "avalanche", security: { totpEnabled: false, totpSecret: null }, profile: { name: "", email: "" }, settings: { currency: "USD" }, assistant: { apiKey: "", model: "claude-sonnet-5", shareData: false }, chamas: [] };
 }
 
 /* ============================= PAYOFF SIMULATION (debts only) ============================= */
@@ -1765,6 +1765,101 @@ function contactSummaries(items) {
     c.items.push(it);
   });
   return [...map.values()].sort((a, b) => (b.debtTotal + b.receivableTotal) - (a.debtTotal + a.receivableTotal));
+}
+
+/* ============================= CHAMAS / GROUP SAVINGS ============================= */
+// A chama (merry-go-round / ROSCA) is a rotating savings group: every member
+// contributes a fixed amount each cycle, and the whole pot goes to one
+// member per cycle, rotating through everyone in turn. This is a distinct
+// data shape from the 1:1 debts/receivables above — it's genuinely a
+// different relationship (a group, not a person), which is why it gets its
+// own model rather than being shoehorned into "items".
+const CHAMA_FREQUENCIES = [
+  { id: "weekly", label: "Weekly", days: 7 },
+  { id: "biweekly", label: "Every 2 weeks", days: 14 },
+  { id: "monthly", label: "Monthly", days: 30 },
+];
+
+function chamaFrequencyLabel(id) {
+  return (CHAMA_FREQUENCIES.find((f) => f.id === id) || CHAMA_FREQUENCIES[2]).label;
+}
+
+function addFrequency(dateISO, frequencyId) {
+  const d = new Date(dateISO + "T00:00:00");
+  if (frequencyId === "monthly") { d.setMonth(d.getMonth() + 1); }
+  else { const days = (CHAMA_FREQUENCIES.find((f) => f.id === frequencyId) || CHAMA_FREQUENCIES[2]).days; d.setDate(d.getDate() + days); }
+  return d.toISOString().slice(0, 10);
+}
+
+// Builds the very first cycle for a brand-new chama: cycle #1, due one
+// frequency-interval from today, recipient is the first member in rotation.
+function buildFirstCycle(members, frequencyId) {
+  return {
+    id: uid("cycle"),
+    cycleNumber: 1,
+    dueDate: addFrequency(todayISO(), frequencyId),
+    recipientId: members[0]?.id || null,
+    payoutMade: false,
+    payoutDate: null,
+    contributions: {}, // memberId -> { paid, amount, date, note }
+  };
+}
+
+// After a payout is marked complete, the next cycle rotates the recipient
+// to the next member in line (wrapping back to the first once everyone's
+// had a turn), and a new due date is computed from today.
+function buildNextCycle(chama) {
+  const lastCycle = chama.cycles[chama.cycles.length - 1];
+  const lastIdx = chama.members.findIndex((m) => m.id === lastCycle.recipientId);
+  const nextIdx = (lastIdx + 1) % chama.members.length;
+  return {
+    id: uid("cycle"),
+    cycleNumber: lastCycle.cycleNumber + 1,
+    dueDate: addFrequency(todayISO(), chama.frequency),
+    recipientId: chama.members[nextIdx]?.id || null,
+    payoutMade: false,
+    payoutDate: null,
+    contributions: {},
+  };
+}
+
+function getCurrentCycle(chama) {
+  return chama.cycles[chama.cycles.length - 1] || null;
+}
+
+// How much has actually been collected this cycle vs. how much is expected
+// (contributionAmount × member count) — the headline progress figure for a
+// chama card.
+function cycleProgress(chama, cycle) {
+  if (!cycle) return { paidCount: 0, totalCount: 0, collected: 0, expected: 0 };
+  const totalCount = chama.members.length;
+  let paidCount = 0, collected = 0;
+  chama.members.forEach((m) => {
+    const c = cycle.contributions[m.id];
+    if (c?.paid) { paidCount++; collected += Number(c.amount) || 0; }
+  });
+  return { paidCount, totalCount, collected, expected: chama.contributionAmount * totalCount };
+}
+
+function chamaRecipientName(chama, cycle) {
+  const m = chama.members.find((x) => x.id === cycle?.recipientId);
+  return m?.name || "—";
+}
+
+// Total, across every active chama, of what this person still owes into
+// the current cycle's pot — used on the Overview tab alongside debts.
+function totalChamaContributionsDue(chamas) {
+  let due = 0;
+  (chamas || []).filter((c) => c.status === "active").forEach((chama) => {
+    const cycle = getCurrentCycle(chama);
+    if (!cycle) return;
+    // "You" are represented as the first member by convention (see
+    // ChamaModal — the creator is always added first).
+    const you = chama.members[0];
+    const yourContribution = cycle.contributions[you?.id];
+    if (!yourContribution?.paid) due += chama.contributionAmount;
+  });
+  return due;
 }
 
 /* ============================= LEDGER ASSISTANT ============================= */
@@ -3190,6 +3285,230 @@ function ItemModal({ initial, defaultType, onClose, onSave, onDelete, onSettle, 
   );
 }
 
+/* ============================= CHAMA MODAL (add/edit) ============================= */
+function ChamaModal({ initial, onClose, onSave, onDelete }) {
+  const isEdit = !!initial;
+  const [name, setName] = useState(initial?.name || "");
+  const [contributionAmount, setContributionAmount] = useState(initial?.contributionAmount ?? "");
+  const [frequency, setFrequency] = useState(initial?.frequency || "monthly");
+  const [members, setMembers] = useState(initial?.members?.length ? initial.members : [{ id: uid("member"), name: "" }, { id: uid("member"), name: "" }]);
+  const [memberInput, setMemberInput] = useState("");
+
+  const addMember = () => {
+    const trimmed = memberInput.trim();
+    if (!trimmed) return;
+    setMembers((m) => [...m, { id: uid("member"), name: trimmed }]);
+    setMemberInput("");
+  };
+  const removeMember = (id) => setMembers((m) => m.filter((x) => x.id !== id));
+  const renameMember = (id, value) => setMembers((prev) => prev.map((x) => (x.id === id ? { ...x, name: value } : x)));
+
+  const validMembers = members.filter((m) => m.name.trim());
+  const valid = name.trim() && Number(contributionAmount) > 0 && validMembers.length >= 2;
+
+  const submit = () => {
+    if (!valid) return;
+    if (isEdit) {
+      onSave({ ...initial, name: name.trim(), contributionAmount: Number(contributionAmount), members: validMembers });
+    } else {
+      const chama = {
+        id: uid("chama"), name: name.trim(), contributionAmount: Number(contributionAmount), frequency,
+        members: validMembers, status: "active", createdAt: new Date().toISOString(), notes: "", cycles: [],
+      };
+      chama.cycles = [buildFirstCycle(chama.members, frequency)];
+      onSave(chama);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center modal-backdrop p-4" style={{ background: "rgba(4,6,10,0.7)" }} onClick={onClose}>
+      <div className="modal-panel glass w-full sm:max-w-lg sm:rounded-3xl p-6 sm:p-7 max-h-[92vh] overflow-y-auto" style={{ borderRadius: "24px" }} onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="font-display text-xl font-semibold">{isEdit ? "Edit chama" : "Add a chama"}</h2>
+          <button onClick={onClose} className="icon-btn w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--surface-hover)] focus-ring"><Icon name="x" size={18} /></button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label className="text-[12px] text-[var(--text-muted)] font-medium mb-2 block">Chama name</label>
+            <input autoFocus type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Umoja Women Group"
+              className="w-full bg-[var(--surface)] border border-[var(--border-soft)] rounded-xl px-4 py-3 text-sm focus-ring focus:border-[var(--emerald)]" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-[12px] text-[var(--text-muted)] font-medium mb-2 block">Contribution per member</label>
+              <div className="relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-dim)] font-mono text-sm">{currentCurrencySymbol()}</span>
+                <input type="number" min="0" value={contributionAmount} onChange={(e) => setContributionAmount(e.target.value)} placeholder="2,000"
+                  className="num-input w-full bg-[var(--surface)] border border-[var(--border-soft)] rounded-xl pl-7 pr-3 py-3 font-mono text-sm focus-ring focus:border-[var(--emerald)]" />
+              </div>
+            </div>
+            <div>
+              <label className="text-[12px] text-[var(--text-muted)] font-medium mb-2 block">Frequency</label>
+              <select value={frequency} onChange={(e) => setFrequency(e.target.value)} disabled={isEdit}
+                className="styled-select w-full bg-[var(--surface)] border border-[var(--border-soft)] rounded-xl px-3 py-3 text-sm focus-ring cursor-pointer disabled:opacity-60">
+                {CHAMA_FREQUENCIES.map((f) => <option key={f.id} value={f.id}>{f.label}</option>)}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="text-[12px] text-[var(--text-muted)] font-medium mb-2 block">Members, in payout order (you first)</label>
+            <div className="space-y-2 mb-3">
+              {members.map((m, i) => (
+                <div key={m.id} className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-[var(--surface)] border border-[var(--border-soft)]">
+                  <span className="text-[11px] font-mono text-[var(--text-dim)] w-5 shrink-0">{i + 1}.</span>
+                  <input type="text" value={m.name} onChange={(e) => renameMember(m.id, e.target.value)}
+                    placeholder={i === 0 ? "You" : "Member name"}
+                    className="flex-1 min-w-0 bg-transparent text-sm focus:outline-none" />
+                  {members.length > 2 && (
+                    <button onClick={() => removeMember(m.id)} className="icon-btn w-6 h-6 rounded-full flex items-center justify-center text-[var(--text-dim)] hover:bg-[var(--surface-hover)] shrink-0" aria-label="Remove member">
+                      <Icon name="x" size={13} />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <input type="text" value={memberInput} onChange={(e) => setMemberInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addMember(); } }}
+                placeholder="Add another member…"
+                className="flex-1 bg-[var(--surface)] border border-[var(--border-soft)] rounded-xl px-4 py-2.5 text-sm focus-ring focus:border-[var(--emerald)]" />
+              <button onClick={addMember} className="h-full px-4 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] hover:bg-[var(--surface-hover)] focus-ring text-sm font-medium">Add</button>
+            </div>
+            <p className="text-[11px] text-[var(--text-dim)] mt-2">The payout rotates through members in this order, one per cycle. Frequency can't be changed once a chama is created.</p>
+          </div>
+        </div>
+
+        <div className="flex gap-3 mt-6">
+          {isEdit && (
+            <button onClick={() => onDelete(initial.id)} className="icon-btn h-12 w-12 rounded-2xl flex items-center justify-center text-[var(--danger)] border border-[#E8BFB8] hover:bg-[#2a1218] focus-ring" aria-label="Delete chama">
+              <Icon name="trash-2" size={18} />
+            </button>
+          )}
+          <button onClick={submit} disabled={!valid} className="flex-1 h-12 rounded-2xl font-display font-semibold text-[15px] disabled:opacity-30 focus-ring"
+            style={{ background: "var(--emerald)", color: "var(--accent-ink)" }}>
+            {isEdit ? "Save changes" : "Create chama"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================= CHAMA DETAIL MODAL (manage cycle) ============================= */
+function ChamaDetailModal({ chama, onClose, onUpdate, onEdit, onPayoutComplete }) {
+  const [showHistory, setShowHistory] = useState(false);
+  const cycle = getCurrentCycle(chama);
+  const progress = cycleProgress(chama, cycle);
+  const allPaid = progress.totalCount > 0 && progress.paidCount === progress.totalCount;
+  const pastCycles = chama.cycles.slice(0, -1);
+
+  const toggleContribution = (memberId) => {
+    const current = cycle.contributions[memberId];
+    const updatedCycle = {
+      ...cycle,
+      contributions: {
+        ...cycle.contributions,
+        [memberId]: current?.paid
+          ? { paid: false, amount: 0, date: null }
+          : { paid: true, amount: chama.contributionAmount, date: todayISO() },
+      },
+    };
+    onUpdate({ ...chama, cycles: chama.cycles.map((c) => (c.id === cycle.id ? updatedCycle : c)) });
+  };
+
+  const markPayout = () => {
+    const updatedCycle = { ...cycle, payoutMade: true, payoutDate: todayISO() };
+    const updatedCycles = chama.cycles.map((c) => (c.id === cycle.id ? updatedCycle : c));
+    const chamaSoFar = { ...chama, cycles: updatedCycles };
+    const nextCycle = buildNextCycle(chamaSoFar);
+    onUpdate({ ...chamaSoFar, cycles: [...updatedCycles, nextCycle] });
+    onPayoutComplete();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center modal-backdrop p-4" style={{ background: "rgba(4,6,10,0.7)" }} onClick={onClose}>
+      <div className="modal-panel glass w-full sm:max-w-lg sm:rounded-3xl p-6 sm:p-7 max-h-[92vh] overflow-y-auto" style={{ borderRadius: "24px" }} onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="font-display text-xl font-semibold truncate">{chama.name}</h2>
+          <div className="flex items-center gap-1 shrink-0">
+            <button onClick={onEdit} className="icon-btn w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--surface-hover)] focus-ring" aria-label="Edit chama"><Icon name="pencil" size={15} /></button>
+            <button onClick={onClose} className="icon-btn w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--surface-hover)] focus-ring"><Icon name="x" size={18} /></button>
+          </div>
+        </div>
+        <p className="text-[12.5px] text-[var(--text-dim)] mb-5">
+          {fmtMoney(chama.contributionAmount)} per member · {chamaFrequencyLabel(chama.frequency)} · Cycle {cycle.cycleNumber}
+        </p>
+
+        <div className="rounded-2xl p-4 mb-5" style={{ background: "var(--azure-dim)", border: "1px solid var(--border-soft-azure)" }}>
+          <div className="flex items-center gap-2 mb-1">
+            <Icon name="crown" size={15} style={{ color: "var(--azure)" }} />
+            <span className="text-[13px] font-medium" style={{ color: "var(--azure)" }}>This cycle's payout goes to {chamaRecipientName(chama, cycle)}</span>
+          </div>
+          <p className="text-[11.5px]" style={{ color: "var(--text-muted)" }}>
+            {fmtMoney(progress.collected)} of {fmtMoney(progress.expected)} collected · due {fmtDate(cycle.dueDate)}
+          </p>
+        </div>
+
+        <div className="space-y-2 mb-5">
+          {chama.members.map((m) => {
+            const c = cycle.contributions[m.id];
+            const paid = !!c?.paid;
+            return (
+              <div key={m.id} className="flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--surface)] border border-[var(--border-soft)]">
+                <div className="flex items-center gap-3 min-w-0">
+                  <Avatar name={m.name} size={34} />
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium truncate flex items-center gap-1.5">
+                      {m.name}
+                      {m.id === cycle.recipientId && <Icon name="crown" size={12} className="text-[var(--amber)] shrink-0" />}
+                    </div>
+                    {paid && c.date && <div className="text-[11px] text-[var(--text-dim)]">Paid {fmtDate(c.date)}</div>}
+                  </div>
+                </div>
+                <button onClick={() => toggleContribution(m.id)}
+                  className="h-8 px-3.5 rounded-full text-[12px] font-display font-semibold focus-ring shrink-0"
+                  style={paid
+                    ? { background: "var(--emerald-dim)", color: "var(--emerald)", border: "1px solid var(--border-soft-emerald)" }
+                    : { background: "var(--surface-hover)", color: "var(--text-muted)", border: "1px solid var(--border-soft)" }}>
+                  {paid ? "Paid ✓" : "Mark paid"}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        <button onClick={markPayout} disabled={cycle.payoutMade}
+          className="w-full h-12 rounded-2xl font-display font-semibold text-[15px] disabled:opacity-40 focus-ring mb-5"
+          style={allPaid
+            ? { background: "var(--emerald)", color: "var(--accent-ink)" }
+            : { background: "var(--surface-hover)", color: "var(--text-muted)", border: "1px solid var(--border-soft)" }}>
+          <Icon name="badge-check" size={16} className="inline mr-2 -mt-0.5" />
+          {allPaid ? `Mark payout complete & start cycle ${cycle.cycleNumber + 1}` : "Mark payout complete anyway"}
+        </button>
+
+        {pastCycles.length > 0 && (
+          <div>
+            <button onClick={() => setShowHistory((s) => !s)} className="flex items-center gap-2 text-[12px] text-[var(--text-muted)] hover:text-[var(--text-primary)]">
+              <Icon name={showHistory ? "chevron-down" : "chevron-right"} size={13} /> {pastCycles.length} past cycle{pastCycles.length === 1 ? "" : "s"}
+            </button>
+            {showHistory && (
+              <div className="mt-2 space-y-1.5">
+                {[...pastCycles].reverse().map((c) => (
+                  <div key={c.id} className="flex items-center justify-between text-[12px] px-3 py-2 rounded-lg bg-[var(--surface)]">
+                    <span className="text-[var(--text-muted)]">Cycle {c.cycleNumber} · paid out to {chamaRecipientName(chama, c)}</span>
+                    <span className="font-mono" style={{ color: c.payoutMade ? "var(--emerald)" : "var(--danger)" }}>{c.payoutMade ? "Completed" : "Incomplete"}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ============================= STRATEGY TOGGLE & BUDGET ============================= */
 function StrategyToggle({ strategy, setStrategy }) {
   return (
@@ -3360,6 +3679,63 @@ function ContactsView({ items, onOpenItem }) {
             </div>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+/* ============================= CHAMAS VIEW ============================= */
+function ChamaCard({ chama, onOpen, delay }) {
+  const cycle = getCurrentCycle(chama);
+  const progress = cycleProgress(chama, cycle);
+  const pct = progress.totalCount ? Math.round((progress.paidCount / progress.totalCount) * 100) : 0;
+  const recipientName = chamaRecipientName(chama, cycle);
+  return (
+    <div className="glass rounded-2xl p-4 sm:p-5 cursor-pointer anim-in" style={{ animationDelay: `${delay}ms` }} onClick={onOpen}>
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="min-w-0">
+          <div className="font-display font-semibold text-[15px] truncate">{chama.name}</div>
+          <div className="text-[12px] text-[var(--text-dim)] mt-0.5 truncate">
+            {chama.members.length} members · {fmtMoney(chama.contributionAmount)}/{chamaFrequencyLabel(chama.frequency).toLowerCase()}
+          </div>
+        </div>
+        <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full shrink-0 whitespace-nowrap" style={{ background: "var(--azure-dim)", color: "var(--azure)", border: "1px solid var(--border-soft-azure)" }}>
+          Cycle {cycle?.cycleNumber || 1}
+        </span>
+      </div>
+      <div className="flex items-center gap-2 mb-3 min-w-0">
+        <Icon name="crown" size={13} className="text-[var(--amber)] shrink-0" />
+        <span className="text-[12.5px] text-[var(--text-muted)] truncate">This cycle's payout: <span className="font-medium text-[var(--text-primary)]">{recipientName}</span></span>
+      </div>
+      <div className="flex items-center justify-between text-[11px] text-[var(--text-dim)] mb-2">
+        <span>{progress.paidCount}/{progress.totalCount} contributed</span>
+        {cycle?.dueDate && <DueBadge item={{ dueDate: cycle.dueDate, reminderDays: 3, status: "active" }} />}
+      </div>
+      <div className="h-1.5 rounded-full bg-[#EEEBE3] overflow-hidden">
+        <div className="progress-bar-fill h-full rounded-full" style={{ width: `${pct}%`, background: "linear-gradient(90deg, var(--azure)88, var(--azure))" }}></div>
+      </div>
+      <div className="mt-3 text-[11px] text-[var(--text-dim)] font-mono">{fmtMoney(progress.collected)} of {fmtMoney(progress.expected)} collected</div>
+    </div>
+  );
+}
+
+function ChamasView({ chamas, onOpenChama, onAddChama }) {
+  const active = (chamas || []).filter((c) => c.status === "active");
+  if (active.length === 0) {
+    return <EmptyState icon="refresh-cw" title="No chamas yet" sub="Add a rotating savings group to track contributions and whose turn it is for the payout." cta="Add a chama" onCta={onAddChama} />;
+  }
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="font-display font-semibold text-lg">Your chamas</h2>
+        <Tooltip label="Add a rotating savings group — contributions, members, and payout order." position="bottom">
+          <button onClick={onAddChama} className="icon-btn inline-flex items-center gap-2 h-9 px-3.5 rounded-xl text-[13px] font-display font-semibold focus-ring" style={{ background: "var(--emerald)", color: "var(--accent-ink)" }}>
+            <Icon name="plus" size={15} /> Add chama
+          </button>
+        </Tooltip>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+        {active.map((chama, i) => <ChamaCard key={chama.id} chama={chama} onOpen={() => onOpenChama(chama)} delay={i * 40} />)}
       </div>
     </div>
   );
@@ -4671,10 +5047,12 @@ function Dashboard({ data, saveData, onLock, onChangeCredential, onFactoryReset,
   // Keep the shared money formatter in sync with this account's chosen currency.
   // Synchronous and before any children render, so every fmtMoney() call below reflects it immediately.
   setCurrentCurrency(data.settings?.currency);
-  const [tab, setTab] = useState("overview"); // overview | owe | owed | contacts | history | stats
+  const [tab, setTab] = useState("overview"); // overview | owe | owed | contacts | chamas | history | stats
   const [modalItem, setModalItem] = useState(null); // null closed, {} new, {...} edit
   const [modalDefaultType, setModalDefaultType] = useState("debt");
   const [showDataPanel, setShowDataPanel] = useState(false);
+  const [modalChama, setModalChama] = useState(null); // null closed, {} new, {...} edit (create/edit form)
+  const [detailChama, setDetailChama] = useState(null); // chama currently open in the manage-cycle view
   const navRef = useRef(null);
   const tabBtnRefs = useRef({});
   const [tabIndicator, setTabIndicator] = useState({ left: 0, width: 0, ready: false });
@@ -4723,6 +5101,8 @@ function Dashboard({ data, saveData, onLock, onChangeCredential, onFactoryReset,
   const totalBalance = debts.filter((d) => d.status === "active").reduce((s, d) => s + d.balance, 0);
   const minSum = debts.filter((d) => d.status === "active").reduce((s, d) => s + d.minPayment, 0);
   const totalReceivable = receivables.filter((d) => d.status === "active").reduce((s, d) => s + d.balance, 0);
+  const activeChamas = (data.chamas || []).filter((c) => c.status === "active");
+  const chamaDue = totalChamaContributionsDue(data.chamas);
 
   const strategyColor = strategy === "snowball"
     ? { text: "var(--emerald)", dim: "var(--emerald-dim)", border: "var(--border-soft-emerald)" }
@@ -4770,11 +5150,30 @@ function Dashboard({ data, saveData, onLock, onChangeCredential, onFactoryReset,
   };
   const handleImportRows = (rows) => setItems((prev) => [...prev, ...rows]);
 
+  const setChamas = (updater) => saveData((prev) => ({ ...prev, chamas: typeof updater === "function" ? updater(prev.chamas || []) : updater }));
+  const handleSaveChama = (chama) => {
+    setChamas((prev) => {
+      const exists = prev.some((c) => c.id === chama.id);
+      return exists ? prev.map((c) => (c.id === chama.id ? chama : c)) : [...prev, chama];
+    });
+    setModalChama(null);
+  };
+  const handleDeleteChama = (id) => {
+    setChamas((prev) => prev.filter((c) => c.id !== id));
+    setModalChama(null);
+    setDetailChama(null);
+  };
+  const handleUpdateChama = (updatedChama) => {
+    setChamas((prev) => prev.map((c) => (c.id === updatedChama.id ? updatedChama : c)));
+    setDetailChama(updatedChama);
+  };
+
   const TABS = [
     { id: "overview", label: "Overview", icon: "bar-chart-3", tip: "Your at-a-glance snapshot: balances, freedom date, and payoff order." },
     { id: "owe", label: "I Owe", icon: "trending-down", tip: "Debts you're paying down — cards, loans, and lines of credit." },
     { id: "owed", label: "Owed to Me", icon: "trending-up", tip: "Money others owe you, plus payments you've received back." },
     { id: "contacts", label: "Contacts", icon: "users", tip: "See what each person owes you or you owe them, grouped together." },
+    { id: "chamas", label: "Chamas", icon: "refresh-cw", tip: "Rotating savings groups — track contributions and whose turn it is for the payout." },
     { id: "history", label: "History", icon: "clock", tip: "Every payment and charge you've ever logged, plus settled debts." },
     { id: "stats", label: "Statistics", icon: "sparkles", tip: "Deeper numbers: net position, totals paid, and largest balances." },
     { id: "settings", label: "Settings", icon: "settings", tip: "Edit your profile name and change your PIN or password." },
@@ -4827,10 +5226,13 @@ function Dashboard({ data, saveData, onLock, onChangeCredential, onFactoryReset,
       <main key={tab} className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 anim-in">
         {tab === "overview" && (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div className={`grid grid-cols-1 sm:grid-cols-2 ${activeChamas.length ? "lg:grid-cols-4" : "lg:grid-cols-3"} gap-4 mb-6`}>
               <MetricCard icon="wallet" label="Total remaining" animateValue={totalBalance} sub={`${debts.filter(d=>d.status==='active').length} active debt${debts.filter(d=>d.status==='active').length===1?"":"s"}`} accent="emerald" delay={0} tip="The combined balance of every active debt you're currently paying down." />
               <MetricCard icon="trending-down" label="Interest to be paid" animateValue={sim.totalInterest} sub={strategy === "avalanche" ? "Minimized via Avalanche" : "Snowball order applied"} accent="amber" delay={60} tip="Total interest you'll pay over the life of your plan at this strategy." />
               <MetricCard icon="calendar-check" label="Freedom date" value={debts.filter(d=>d.status==='active').length ? monthsFromNowLabel(sim.months) : "—"} sub={debts.filter(d=>d.status==='active').length ? `${sim.months} month${sim.months === 1 ? "" : "s"} from now` : "Add debts to begin"} accent="azure" delay={120} tip="Projected month you'll be completely debt-free at your current extra budget." />
+              {activeChamas.length > 0 && (
+                <MetricCard icon="refresh-cw" label="Chama due this cycle" animateValue={chamaDue} sub={`Across ${activeChamas.length} active chama${activeChamas.length === 1 ? "" : "s"}`} accent="violet" delay={180} tip="What you still owe into the current cycle's pot, across every active chama you're part of." />
+              )}
             </div>
 
             {sim.insufficient && (
@@ -4908,6 +5310,7 @@ function Dashboard({ data, saveData, onLock, onChangeCredential, onFactoryReset,
         )}
 
         {tab === "contacts" && <ContactsView items={items} onOpenItem={setModalItem} />}
+        {tab === "chamas" && <ChamasView chamas={data.chamas} onOpenChama={setDetailChama} onAddChama={() => setModalChama({})} />}
         {tab === "history" && <HistoryView items={items} />}
         {tab === "stats" && <StatisticsView items={items} sim={sim} extraBudget={extraBudget} strategy={strategy} />}
         {tab === "settings" && <SettingsView data={data} saveData={saveData} onChangeCredential={onChangeCredential} onFactoryReset={onFactoryReset} cloudUser={cloudUser} cloudSyncStatus={cloudSyncStatus} onCloudSignedIn={onCloudSignedIn} />}
@@ -4925,6 +5328,23 @@ function Dashboard({ data, saveData, onLock, onChangeCredential, onFactoryReset,
         />
       )}
       {showDataPanel && <DataPanel items={items} onClose={() => setShowDataPanel(false)} onImport={handleImportRows} />}
+      {modalChama !== null && (
+        <ChamaModal
+          initial={modalChama.id ? modalChama : null}
+          onClose={() => setModalChama(null)}
+          onSave={(chama) => { handleSaveChama(chama); if (detailChama?.id === chama.id) setDetailChama(chama); }}
+          onDelete={handleDeleteChama}
+        />
+      )}
+      {detailChama && !modalChama && (
+        <ChamaDetailModal
+          chama={detailChama}
+          onClose={() => setDetailChama(null)}
+          onUpdate={handleUpdateChama}
+          onEdit={() => setModalChama(detailChama)}
+          onPayoutComplete={triggerCelebration}
+        />
+      )}
       <SupportButton stacked />
       <AssistantLauncher data={data} saveData={saveData} sim={sim} />
     </div>
@@ -5758,6 +6178,7 @@ function App() {
       profile: { name: "" },
       settings: { currency: "USD" },
       assistant: { apiKey: "", model: "claude-sonnet-5", shareData: false },
+      chamas: [],
     };
     const dataBlob = await encryptJSON(dek, initial);
 
